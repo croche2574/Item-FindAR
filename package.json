@@ -1,0 +1,11 @@
+{
+  "name": "item-findar",
+  "version": "1.0.0",
+  "description": "AR item location aid for the Web.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Colter Roche",
+  "license": "ISC"
+}
