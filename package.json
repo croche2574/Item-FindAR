@@ -2,10 +2,39 @@
   "name": "item-findar",
   "version": "1.0.0",
   "description": "AR item location aid for the Web.",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack serve",
+    "start:live": "concurrently --names 'wds,localtunnel' --prefix-colors 'green,yellow' --kill-others-on-fail \"npm start\" \"lt --port 8080\"",
+    "build": "webpack build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/croche2574/AR-App"
   },
   "author": "Colter Roche",
-  "license": "ISC"
+  "license": "ISC",
+  "private": true,
+  "devDependencies": {
+    "concurrently": "^8.2.1",
+    "copy-webpack-plugin": "^11.0.0",
+    "css-loader": "^6.8.1",
+    "html-webpack-plugin": "^5.5.3",
+    "localtunnel": "^2.0.2",
+    "style-loader": "^3.3.3",
+    "terser-webpack-plugin": "^5.3.9",
+    "url-loader": "^4.1.1",
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
+  },
+  "dependencies": {
+    "@react-three/drei": "^9.80.5",
+    "@react-three/fiber": "^8.13.7",
+    "@react-three/xr": "^5.6.2",
+    "lodash": "^4.17.21",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "three": "^0.155.0"
+  }
 }
