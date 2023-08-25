@@ -5,9 +5,20 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const TerserWebpackPlugin = require("terser-webpack-plugin");
 
 module.exports = {
-  entry: './src/index.js',
+  mode: 'development',
+  entry: './src/index.jsx',
   module: {
     rules: [
+      {
+        test: /\.(js|jsx)$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env', '@babel/preset-react']
+          }
+        }
+      },
       {
         test: /\.css$/,
         use: [
@@ -26,7 +37,7 @@ module.exports = {
     ]
   },
   resolve: {
-    extensions: [".tsx", ".ts", ".js", ".css", ".jpg"],
+    extensions: [".tsx", ".ts", ".js", ".jsx", ".css", ".jpg"],
   },
   plugins: [
     new HtmlWebpackPlugin({
@@ -35,12 +46,12 @@ module.exports = {
       inject: 'body'
     }),
     new CopyWebpackPlugin({
-      patterns: [{ from: "./assets/models", to: "./assets/models" }],
+      patterns: [{ from: "./assets/models", to: "./assets/models", noErrorOnMissing: true }]
     }),
   ],
   output: {
-    filename: "[name].bundle.js",
-    path: path.resolve(__dirname, "dist"),
+    filename: "bundle.js",
+    path: path.resolve(__dirname, "./dist"),
     clean: true,
   },
   devServer: {
@@ -49,6 +60,9 @@ module.exports = {
     port: 8080,
     client: {
       webSocketURL: "ws://0.0.0.0/ws",
+    },
+    static: {
+      directory: path.join(__dirname, './')
     },
     proxy: {
       "/ws": {

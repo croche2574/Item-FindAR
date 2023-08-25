@@ -2,6 +2,7 @@
   "name": "item-findar",
   "version": "1.0.0",
   "description": "AR item location aid for the Web.",
+  "main": "./src/index.jsx",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack serve",
@@ -10,12 +11,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/croche2574/AR-App"
+    "url": "https://github.com/croche2574/Item-FindAR"
   },
   "author": "Colter Roche",
   "license": "ISC",
   "private": true,
   "devDependencies": {
+    "@babel/core": "^7.22.10",
+    "@babel/preset-env": "^7.22.10",
+    "@babel/preset-react": "^7.22.5",
+    "babel-loader": "^9.1.3",
     "concurrently": "^8.2.1",
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.8.1",
