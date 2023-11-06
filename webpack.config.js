@@ -3,6 +3,7 @@ const path = require('path')
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const TerserWebpackPlugin = require("terser-webpack-plugin");
+const fs = require('fs');
 
 module.exports = {
   mode: 'development',
@@ -38,6 +39,11 @@ module.exports = {
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js", ".jsx", ".css", ".jpg"],
+    fallback: {
+      "fs": false,
+      "path": false,
+      "os": false
+    },
   },
   plugins: [
     new HtmlWebpackPlugin({
@@ -55,11 +61,19 @@ module.exports = {
     clean: true,
   },
   devServer: {
-    allowedHosts: [".loca.lt"],
+    allowedHosts: 'all',
     open: false,
     port: 8080,
     client: {
       webSocketURL: "ws://0.0.0.0/ws",
+    },
+    server: {
+      type: 'https',
+      options: {
+        key: fs.readFileSync("cert.key"),
+        cert: fs.readFileSync("cert.crt"),
+        ca: fs.readFileSync("ca.crt"),
+      },
     },
     static: {
       directory: path.join(__dirname, './')

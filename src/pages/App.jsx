@@ -1,50 +1,27 @@
-import AnchorSystem from "../features/anchor_localization/"
+import { AugmentSystem } from '../features/augment_system/AugmentSystem'
 import React, { Suspense, useState } from 'react'
-import { Interactive, XR, ARButton, Controllers } from '@react-three/xr'
-import { Text } from '@react-three/drei'
+import { Interactive, XR, ARButton } from '@react-three/xr'
 import { Canvas } from '@react-three/fiber'
-
-function Box({ color, size, scale, children, ...rest }) {
-  return (
-    <mesh scale={scale} {...rest}>
-      <boxGeometry args={size} />
-      <meshPhongMaterial color={color} />
-      {children}
-    </mesh>
-  )
-}
-
-function Button(props) {
-  const [hover, setHover] = useState(false)
-  const [color, setColor] = useState('blue')
-
-  const onSelect = () => {
-    setColor((Math.random() * 0xffffff) | 0)
-  }
-
-  return (
-    <Interactive onHover={() => setHover(true)} onBlur={() => setHover(false)} onSelect={onSelect}>
-      <Box color={color} scale={hover ? [0.6, 0.6, 0.6] : [0.5, 0.5, 0.5]} size={[0.4, 0.1, 0.1]} {...props}>
-        <Suspense fallback={null}>
-          <Text position={[0, 0, 0.06]} fontSize={0.05} color="#000" anchorX="center" anchorY="middle">
-            Hello react-xr!
-          </Text>
-        </Suspense>
-      </Box>
-    </Interactive>
-  )
-}
+import tunnel from 'tunnel-rat'
 
 export default function App() {
+  const t = tunnel()
   return (
     <>
-      <ARButton />
+      <div id="box-display">
+        <t.Out />
+      </div>
+      <ARButton
+        sessionInit={{
+          requiredFeatures: ['camera-access', 'hit-test', 'anchors'],
+          domOverlay: typeof document !== 'undefined' ? { root: document.body } : undefined,
+        }} />
+      
       <Canvas>
         <XR referenceSpace="local">
+          <AugmentSystem tunnel={t} />
           <ambientLight />
           <pointLight position={[10, 10, 10]} />
-          <Button position={[0, 0.1, -0.2]} />
-          <Controllers />
         </XR>
       </Canvas>
     </>
