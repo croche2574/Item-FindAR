@@ -1,31 +1,50 @@
 import React, { useEffect, useRef, useState, memo, useMemo } from 'react'
 import { Canvas, useThree, useFrame } from '@react-three/fiber'
-import { useXR, XR, toggleSession, XRButton, Interactive} from '@react-three/xr'
+import { useXR, XR, toggleSession, XRButton, Interactive } from '@react-three/xr'
 import * as THREE from 'three'
+import { useReadCypher } from 'use-neo4j'
+import { InfoMenu } from '../augmentations/InfoMenu'
+
+const FontJSON = '../../../Roboto-msdf.json'
+const FontImage = '../../../Roboto-msdf.png'
 
 const ItemMarker = memo((props) => {
-    const { id, className, position, scale, quaternion } = props
+    const { id, itemData, position, scale, quaternion } = props
     const [color, setColor] = useState('blue')
-    console.log('created')
-    const onSelect = (e) => {
+    const [menuVis, setMenuVis] = useState(false)
+    const menuRef = useRef()
+
+    console.log('created', itemData.name)
+    console.log('visible', menuVis)
+
+    const onMarkerSelect = (e) => {
         setColor((Math.random() * 0xffffff) | 0)
+        if (menuVis && menuRef.current) {
+            console.log("ref unload", menuRef.current)
+            menuRef.current.clear()
+        } else if (!menuVis && menuRef.current) {
+            console.log("menu ref", menuRef.current)
+        }
+        setMenuVis(!menuVis)
+        //console.log("item data", itemData)
     }
+    
 
     return (
-        <Interactive onSelect={onSelect}>
-            <mesh position={position} scale={scale} quaternion={quaternion} castShadow receiveShadow>
-                <sphereGeometry args={[5, 24, 24]} />
-                <meshStandardMaterial color={color} />
-            </mesh>
-        </Interactive>
+        <>
+            <Interactive onSelect={onMarkerSelect}>
+                <mesh position={position} scale={scale} quaternion={quaternion} castShadow receiveShadow>
+                    <sphereGeometry args={[5, 24, 24]} />
+                    <meshStandardMaterial color={color} />
+                </mesh>
+            </Interactive>
+
+            {menuVis && itemData && <InfoMenu menuRef={menuRef} data={itemData} menuVis={menuVis} setMenuVis={setMenuVis} position={position} quaternion={quaternion} scale={scale} FontJSON={FontJSON.valueOf()} FontImage={FontImage.valueOf()} />}
+        </>
     )
 })
 
-const MarkerSystem = (props) => {
-
-}
-
-const useHitTest = (callback, objects) => {
+const useHitTest = (callback, objects, setObjects) => {
     const session = useXR((state) => state.session)
     const { gl } = useThree()
     const refspace = gl.xr.getReferenceSpace()
@@ -38,97 +57,91 @@ const useHitTest = (callback, objects) => {
     useEffect(() => {
         if (!session || !objects) return
         //console.log(objects)
+        let temp = []
+        let obsChanged = false
 
         for (const obj of objects) {
-            console.log("obj run", obj)
-            console.log("obj anchor", obj.anchorData)
-            if (obj.anchorData) continue
+            //console.log("obj run", obj)
+            //console.log("obj anchor", obj.anchorData)
+            if (obj.anchorData || obj.hitsource) {
+                temp.push(obj)
+            } else {
+                obsChanged = true
+                let c = transformOrigin([obj.x + (obj.w / 2), obj.y + (obj.h / 2) - .2]);
+                
+                console.log("center", c)
+                session.requestReferenceSpace('viewer').then((ref) => {
+                    (async () => await session.requestHitTestSource({
+                        space: ref,
+                        entityTypes: ["point"],
+                        offsetRay: new XRRay({ x: c[0], y: c[1] })
+                    }).then((hitsource) => {
+                        console.log("hit_source", hitsource)
+                        obj.hitsource = hitsource
+                    }))();
+                })
 
-            let c = transformOrigin([obj.x + (obj.w / 2), obj.y + (obj.h / 2)]);
-            console.log("center", c)
-            session.requestReferenceSpace('viewer').then((ref) => {
-                (async () => await session.requestHitTestSource({
-                    space: ref,
-                    entityTypes: ["point"],
-                    offsetRay: new XRRay({ x: c[0], y: c[1] })
-                }).then((hitsource) => {
-                    console.log("hit_source", hitsource)
-                    obj.hitsource = hitsource
-                }))();
-            })
-
-            //console.log("obj", obj)
-            //temp.push(obj)
+                console.log("obj", obj)
+                temp.push(obj)
+            }
+        }
+        if (obsChanged) {
+            setObjects(temp)
         }
     }, [session, objects])
 
     useFrame((state, _, frame) => {
         if (!frame) return
+        let temp = []
+        let obsChanged = false
 
         for (const obj of objects) {
             //console.log("source", obj.hitsource)
-            if (!obj.hitsource || obj.anchorData) continue
+            if (!obj.hitsource || obj.anchorData) {
+                temp.push(obj)
+            } else {
+                obsChanged = true;
+                [obj.hit] = frame.getHitTestResults(obj.hitsource)
+                console.log('hit', obj.hit)
+                if (obj.hit) {
+                    const pose = obj.hit.getPose(refspace)
+                    //hits.push(hit)
 
-            [obj.hit] = frame.getHitTestResults(obj.hitsource)
-            console.log('hit', obj.hit)
-            if (obj.hit) {
-                const pose = obj.hit.getPose(refspace)
-                //hits.push(hit)
+                    if (pose) {
+                        hitMatrix.fromArray(pose.transform.matrix)
+                        obj.hitMatrix = hitMatrix
+                    }
 
-                if (pose) {
-                    hitMatrix.fromArray(pose.transform.matrix)
-                    obj.hitMatrix = hitMatrix
-                }
+                    obj.hit.createAnchor().then(
+                        (anchor) => {
+                            //console.log('anchor:', anchor)
 
-                obj.hit.createAnchor().then(
-                    (anchor) => {
-                        //console.log('anchor:', anchor)
-
-                        //console.log("matrix", obj.hitMatrix)
-                        obj.anchorData = {
-                            anchor: anchor,
-                            object: {
-                                position: new THREE.Vector3().setFromMatrixPosition(obj.hitMatrix),
-                                scale: new THREE.Vector3()
-                                    .setFromMatrixScale(obj.hitMatrix)
-                                    .clamp(new THREE.Vector3(0.001, 0.001, 0.001), new THREE.Vector3(0.01, 0.01, 0.01)),
-                                quaternion: new THREE.Quaternion().setFromRotationMatrix(obj.hitMatrix)
+                            //console.log("matrix", obj.hitMatrix)
+                            obj.anchorData = {
+                                anchor: anchor,
+                                object: {
+                                    position: new THREE.Vector3().setFromMatrixPosition(obj.hitMatrix),
+                                    scale: new THREE.Vector3()
+                                        .setFromMatrixScale(obj.hitMatrix)
+                                        .clamp(new THREE.Vector3(0.001, 0.001, 0.001), new THREE.Vector3(0.01, 0.01, 0.01)),
+                                    quaternion: new THREE.Quaternion().setFromRotationMatrix(obj.hitMatrix)
+                                }
                             }
-                        }
-                        obj.hitsource.cancel()
-                        obj.hitsource = null
-                        console.log("anchored", obj)
-                        callback()
-                    })
+                            obj.hitsource.cancel()
+                            obj.hitsource = null
+                            console.log("anchored", obj)
+                            callback()
+                        })
+                }
+                temp.push(obj)
+                //console.log(hitTestSource.current)
             }
-            //console.log(hitTestSource.current)
-
+        }
+        if (obsChanged) {
+            console.log("items changed")
+            setObjects(temp)
         }
     })
-}
-const getCameraIntrinsics = (projectionMatrix, viewport) => {
-    const p = projectionMatrix;
-
-    // Principal point in pixels (typically at or near the center of the viewport)
-    let u0 = (1 - p[8]) * viewport.width / 2 + viewport.x;
-    let v0 = (1 - p[9]) * viewport.height / 2 + viewport.y;
-
-    // Focal lengths in pixels (these are equal for square pixels)
-    let ax = viewport.width / 2 * p[0];
-    let ay = viewport.height / 2 * p[5];
-
-    // Skew factor in pixels (nonzero for rhomboid pixels)
-    let gamma = viewport.width / 2 * p[4];
-
-    // Print the calculated intrinsics:
-    const intrinsicString = (
-        "intrinsics: u0=" + u0 + " v0=" + v0 + " ax=" + ax + " ay=" + ay +
-        " gamma=" + gamma + " for viewport {width=" +
-        viewport.width + ",height=" + viewport.height + ",x=" +
-        viewport.x + ",y=" + viewport.y + "}");
-
-    //console.log("projection:", Array.from(projectionMatrix).join(", "));
-    //console.log(intrinsicString);
 }
 
 export const AnchorSystem = memo((props) => {
@@ -136,13 +149,98 @@ export const AnchorSystem = memo((props) => {
     const detectedItems = props.detectedItems
     const [isDirty, setDirty] = useState(false)
 
+    //const query = 'match (n) return n'
+    const { loading: loading, result: results, first: first, run: run } = useReadCypher('MATCH (n:Item)-[r]-(c) WHERE n.class_code IN $clsnames RETURN n, r, c', { clsnames: [] })
+
     useHitTest(() => {
         setDirty(!isDirty)
-    }, detectedItems)
+    }, props.detectedItems, props.setDetectedItems)
 
     useEffect(() => {
         console.log("refresh", detectedItems)
-    }, [detectedItems, isDirty])
+    }, [isDirty])
+
+    useEffect(() => {
+        console.log(results)
+        if (results === undefined || results.records.length === 0) {
+            console.log("no results")
+        } else {
+            const temp = detectedItems.map((item) => {
+                console.log("Item", item)
+                if (item.clsname && !item.itemData) {
+                    item.itemData = {}
+                    item.itemData.allergens = []
+                    item.itemData.nutrients = {}
+                    item.itemData.tags = []
+
+                    console.log("results", results)
+
+                    results.records.map((record) => {
+                        console.log(record)
+                        let itemNode = record.get('n')
+                        let relationship = record.get('r')
+                        let endNode = record.get('c')
+                        console.log(itemNode.properties.class_code, item.clsname)
+                        if (itemNode.properties.class_code === item.clsname) {
+                            item.itemData.name = itemNode.properties.name
+                            item.itemData.brand = itemNode.properties.brand
+                            item.itemData.ingredientList = itemNode.properties.ingredient_list
+                            item.itemData.servings = itemNode.properties.servings
+
+                            console.log(relationship.type)
+
+                            switch (relationship.type) {
+                                case 'CONTAINS_NUTRIENT':
+                                    item.itemData.nutrients[endNode.properties.name] = relationship.properties
+                                    break
+
+                                case 'CONTAINS_INGREDIENT':
+                                    break
+
+                                case 'CONTAINS_SUBINGREDIENT':
+                                    break
+
+                                case 'CONTAINS_ALLERGEN':
+                                    item.itemData.allergens.push({ name: endNode.properties.name, may: false })
+                                    break
+
+                                case 'MAY_CONTAIN_ALLERGEN':
+                                    item.itemData.allergens.push({ name: endNode.properties.name, may: false })
+                                    break
+
+                                case 'TAGGED_AS':
+                                    item.itemData.tags.push(endNode.properties.name)
+                                    break
+
+                                default:
+                                    break;
+                            }
+                        }
+                    })
+                    return item
+                } else {
+                    return item
+                }
+
+            })
+            console.log("temp", temp)
+            props.setDetectedItems(temp)
+        }
+
+    }, [results])
+
+    useEffect(() => {
+        console.log("changed", detectedItems)
+        let classes = []
+        for (const item of detectedItems) {
+            if (item.itemData === undefined) {
+                classes.push(item.clsname)
+            }
+        }
+        if (classes.length) {
+            run({ clsnames: classes })
+        }
+    }, [detectedItems])
 
     useFrame((state, _, frame) => {
         const referenceSpace = gl.xr.getReferenceSpace()
@@ -163,7 +261,8 @@ export const AnchorSystem = memo((props) => {
         }
     })
 
-    if (props.enabled) {
+    //console.log("detItems", detectedItems)
+    if (props.enabled && detectedItems != undefined) {
         return (
             <group>
                 {detectedItems.map((item, index) => {
@@ -172,8 +271,11 @@ export const AnchorSystem = memo((props) => {
                     if (!item.anchorData) {
                         console.log("No anchor")
                         return
+                    } else if (!item.itemData) {
+                        console.log("No ItemData")
+                        return
                     } else {
-                        return <ItemMarker key={item.id} id={item.id} itemClass={item.className} position={item.anchorData.object.position} scale={item.anchorData.object.scale} quaternion={item.anchorData.object.quaternion} />
+                        return <ItemMarker key={item.id} id={item.id} itemData={item.itemData} position={item.anchorData.object.position} scale={item.anchorData.object.scale} quaternion={item.anchorData.object.quaternion} />
                     }
                 })}
             </group>

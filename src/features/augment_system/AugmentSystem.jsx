@@ -1,15 +1,14 @@
-import React, { useState, useRef } from "react"
+import React, { useState, useRef, useEffect } from "react"
 import { useXR } from "@react-three/xr"
 import { AnchorSystem } from "./components/AnchorSystem"
 import { ItemDetector } from "./components/ItemDetector"
 import { ARScene, Reticle } from "./components/ReticleSystem"
-import { BoundBoxSystem } from "./components/BoundingBoxSystem"
 
 export const AugmentSystem = (props) => {
     const isPresenting = useXR((state) => state.isPresenting)
-    console.log(isPresenting)
+    //console.log(isPresenting)
     const [mode, setMode] = useState("search")
-    const [detectedItems, setDetectedItems] = useState([])
+    const [detectedItems, setDetectedItems] = useState()
     const [imageShape, setImageShape] = useState({
         height: 0,
         width: 0,
@@ -21,11 +20,15 @@ export const AugmentSystem = (props) => {
     // create a ref to hold the latest hit test result
     var lastHitTestRef = useRef(null)
 
+    useEffect(() => {
+        setDetectedItems([])
+    }, [])
+
     if (isPresenting) {
         if (mode === "search") {
             return (
                 <>
-                    <AnchorSystem detectedItems={detectedItems} setDetectedItems={setDetectedItems} imageShape={imageShape} enabled={isPresenting} tunnel={props.tunnel} />
+                    <AnchorSystem detectedItems={detectedItems} setDetectedItems={setDetectedItems} imageShape={imageShape} enabled={isPresenting} />
                     <ItemDetector detectedItems={detectedItems} setDetectedItems={setDetectedItems} setImageShape={setImageShape} enabled={isPresenting} />
                 </>
             )

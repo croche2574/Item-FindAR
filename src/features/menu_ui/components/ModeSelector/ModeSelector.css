@@ -1,0 +1,60 @@
+html,
+body {
+  margin: 0;
+  background-color: rgb(132, 132, 132);
+}
+
+.ui-center {
+  text-align: center;
+}
+
+h1 {
+  margin: 1.5em;
+  font-size: 24px;
+  text-align: center;
+}
+
+.carousel-container {
+  display: flex;
+  height: 64px;
+  max-width: 400px;
+  margin: 0 auto;
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.carousel-track {
+  display: flex;
+  height: 100%;
+}
+
+.carousel-card {
+  flex: 0 0 64px;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-weight: bold;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.carousel-card-inner {
+  flex-direction: column;
+  width: 60px;
+  height: 60px;
+  border-radius: 5px;
+}
+
+.carousel-title {
+  margin-top: 20px;
+  font-size: 1.5em;
+}
+
+.carousel-text {
+  padding: 1em;
+  font-size: 14px;
+  white-space: pre-wrap;
+  text-align: left;
+  font-family: sans-serif;
+}

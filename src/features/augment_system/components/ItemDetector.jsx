@@ -55,26 +55,34 @@ const Detector = (props) => {
         if (frameImg.current && socketStatus == "Open") {
             //console.log("sending frame")
             //console.log(getWebSocket())
-            socket.postMessage({mode:"send" , buff: frameImg.current.buffer}, [frameImg.current.buffer])
+            try {
+                socket.postMessage({mode:"send" , buff: frameImg.current.buffer}, [frameImg.current.buffer])
+            } catch (error) {
+                console.log("Frame detached.")
+            }
         }
     }, timeout)
 
     useEffect(() => { // Receive coords from server
         socket.onmessage = (e) => {
+            console.log(e.data)
             switch (e.data) {
                 case "Open":
-                    console.log(e.data)
+                    
                     setSocketStatus(e.data)
                     break
                 case "Closed":
                     console.log(e.data)
                     setSocketStatus(e.data)
                     break
-                case "[]":
+                case "\"[]\"":
+                    console.log("set empty")
                     props.setDetectedItems([])
                     break
                 default:
-                    props.setDetectedItems(props.dataProcessor(JSON.parse(e.data)))
+                    props.setDetectedItems((state) => {
+                        return props.dataProcessor(JSON.parse(e.data), state)
+                    })
                     break
             }
         }
@@ -82,18 +90,38 @@ const Detector = (props) => {
 }
 
 export const ItemDetector = (props) => {
-    const detectProc = (data) => {
+    const [data, setData] = useState([])
+
+    useEffect(() => {
+        //console.log("effect print", props.detectedItems)
+    }, [props.detectedItems])
+    
+    const detectProc = (data, state) => {
         let newData = JSON.parse(data)
-        console.log("fetched data", data)
-        for (var newObj of newData) {
-            for (const obj of props.detectedItems) {
-                if (newObj.id === obj.id) {
-                    newObj = obj
+        let temp = []
+        console.log("fetched data", newData)
+        console.log("item props", props.detectedItems)
+        if (state.length === 0) {
+            temp = newData
+        } else {
+            for (var newObj of newData) {
+                console.log("new ob", newObj)
+                let tempObj = null
+                for (const obj of state) {
+                    if (newObj.id === obj.id) {
+                        tempObj = obj
+                    }
+                }
+                if (tempObj) {
+                    temp.push(tempObj)
+                } else {
+                    temp.push(newObj)
                 }
             }
         }
-        console.log("edited data", newData)
-        return newData
+        
+        console.log("edited data", temp)
+        return temp
     }
 
     return (

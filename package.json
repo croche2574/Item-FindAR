@@ -58,6 +58,7 @@
     "react-konva": "^18.2.10",
     "react-touch-carousel": "^0.10.2",
     "three": "^0.155.0",
+    "three-mesh-ui": "^6.5.4",
     "tunnel-rat": "^0.1.2",
     "use-neo4j": "^0.3.13"
   }
