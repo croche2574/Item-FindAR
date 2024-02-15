@@ -8,30 +8,39 @@ import ToggleChip from "../ToggleChip/ToggleChip.jsx";
 import Stack from "@mui/system/Stack";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
+import { objectMapToArray } from "../../../../common/ObjectMap.jsx";
 
 const SearchSection = forwardRef((props, _ref) => {
-    const options = props.options
-    const toggleStates = props.options
-    const [selected, setSelected] = useState([])
-    const [allowedOptions, setAllowed] = useState([])
-    const [deniedOptions, setDenied] = useState([])
+    const toggleStates = props.toggleStates
+    const [selected, setSelected] = useState({})
 
-    const toggleHandler = useCallback((label, state) => {
-        if (state === 'Allowed') {
-            setAllowed(allowedOpts => [...allowedOpts, label])
-        } else if (state === 'Denied') {
-            setAllowed(allowedOpts => allowedOpts.filter(opt => opt != label))
-            setDenied(deniedOpts => [...deniedOpts, label])
-        } else {
-            setDenied(deniedOpts => deniedOpts.filter(opt => opt != label))
-        }
-    })
+    const toggleHandler = (e) => {
+        const label = e.currentTarget.textContent
+        console.log("label ", label)
+        console.log("selected before ", selected)
+        setSelected((prevState) => {
+            ({
+                ...prevState,
+                [label]: (prevState[label] + 1) % toggleStates.length
+            })
+        })
+        console.log("selected after", selected)
+    }
+
+    const deleteHandler = (e) => {
+        const label = e.target.parentNode.innerText
+        setSelected((prevState) => {
+            Object.keys(selected).filter(key => key != label).reduce((newObj, key) => {
+                newObj[key] = selected[key]
+                return newObj
+            })
+        })
+    }
 
     useImperativeHandle(_ref, () => ({
-        getAllowedState: () => {return allowedOptions},
-        getDeniedState: () => {return deniedOptions}
+        getChipStates: () => { return selected }
     }))
-
+    console.log("selected ", selected)
     return (
         <Accordion defaultExpanded={props.expanded}>
             <AccordionSummary
@@ -46,27 +55,26 @@ const SearchSection = forwardRef((props, _ref) => {
                         id="search-box"
                         renderTags={() => { }}
                         filterSelectedOptions
-                        value={selected}
-                        onChange={(e, newValue) => setSelected(newValue)}
-                        options={options}
+                        value={selected ? Object.keys(selected) : []}
+                        onChange={(e) => {setSelected((prevState) => ({...prevState, [e.target.innerText]: 0}))}}
+                        options={props.options}
                         size="small"
                         renderInput={(params) => <TextField variant="filled" {...params} label={'Search ' + props.sectionTitle} />}
                     />
 
                     <Stack sx={{ flexWrap: 'wrap', gap: 1, margin: 1 }} direction="row" spacing={1}>
-                        {selected.map(val => <ToggleChip
+                        {selected && objectMapToArray(selected, (state, label) => <ToggleChip
+                            key={label}
                             stateProps={toggleStates}
-                            key={val}
-                            label={val}
-                            onToggle={toggleHandler}
-                            onDelete={() => setSelected(selected.filter(entry => entry !== val))} />)}
+                            toggleHandler={toggleHandler}
+                            label={label}
+                            state={state}
+                            onDelete={deleteHandler} />)}
                     </Stack>
-
                 </Stack>
             </AccordionDetails>
         </Accordion>
     )
-
 })
 
 export default React.memo(SearchSection)

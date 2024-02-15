@@ -10,17 +10,14 @@ import { objectMapToArray } from "../../../../common/ObjectMap"
 
 const BasicSection = forwardRef((props, _ref) => {
     const [optionState, setOptionState] = useState(Object.fromEntries(props.options.map(k => [k, 0])))
-    console.log(optionState)
     const toggleStates = props.toggleStates
+    
     const toggleHandler = useCallback((e) => {
-        console.log(e)
         const label = e.currentTarget.textContent
-        setOptionState((prevState) => {
-            console.log("label ", label)
-            return {
+        setOptionState((prevState) => ({
             ...optionState,
             [label]: (prevState[label] + 1) % toggleStates.length
-        }})
+        }))
     }, [optionState])
 
     useImperativeHandle(_ref, () => ({
@@ -39,7 +36,12 @@ const BasicSection = forwardRef((props, _ref) => {
                     {props.description}
                 </Typography>
                 <Stack sx={{ flexWrap: 'wrap', gap: 1 }} direction="row" spacing={1}>
-                    {objectMapToArray(optionState, (state, label) => <ToggleChip key={label} stateProps={toggleStates} toggleHandler={toggleHandler} label={label} state={state} />)}
+                    {objectMapToArray(optionState, (state, label) => <ToggleChip 
+                    key={label} 
+                    stateProps={toggleStates} 
+                    toggleHandler={toggleHandler} 
+                    label={label} 
+                    state={state} />)}
                 </Stack>
             </AccordionDetails>
         </Accordion>
