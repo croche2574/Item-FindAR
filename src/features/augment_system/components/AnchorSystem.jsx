@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState, memo, useMemo } from 'react'
-import { Canvas, useThree, useFrame } from '@react-three/fiber'
-import { useXR, XR, toggleSession, XRButton, Interactive } from '@react-three/xr'
+import React, { useEffect, useRef, useState, memo, useMemo, useCallback } from 'react'
+import { useThree, useFrame } from '@react-three/fiber'
+import { useXR, Interactive } from '@react-three/xr'
 import * as THREE from 'three'
 import { useReadCypher } from 'use-neo4j'
 import { InfoMenu } from '../augmentations/InfoMenu'
@@ -17,7 +17,7 @@ const ItemMarker = memo((props) => {
     console.log('created', itemData.name)
     console.log('visible', menuVis)
 
-    const onMarkerSelect = (e) => {
+    const onMarkerSelect = useCallback((e) => {
         setColor((Math.random() * 0xffffff) | 0)
         if (menuVis && menuRef.current) {
             console.log("ref unload", menuRef.current)
@@ -27,8 +27,8 @@ const ItemMarker = memo((props) => {
         }
         setMenuVis(!menuVis)
         //console.log("item data", itemData)
-    }
-    
+    })
+
 
     return (
         <>
@@ -68,7 +68,7 @@ const useHitTest = (callback, objects, setObjects) => {
             } else {
                 obsChanged = true
                 let c = transformOrigin([obj.x + (obj.w / 2), obj.y + (obj.h / 2) - .2]);
-                
+
                 console.log("center", c)
                 session.requestReferenceSpace('viewer').then((ref) => {
                     (async () => await session.requestHitTestSource({
@@ -244,10 +244,10 @@ export const AnchorSystem = memo((props) => {
 
     useFrame((state, _, frame) => {
         const referenceSpace = gl.xr.getReferenceSpace()
-        let pose = frame.getViewerPose(referenceSpace)
-        let session = gl.xr.getSession()
-        let context = gl.getContext()
         try {
+            let pose = frame.getViewerPose(referenceSpace)
+            let session = gl.xr.getSession()
+            let context = gl.getContext()
             let xrviewport = session.renderState.baseLayer.getViewport(pose.views[0])
             let proMatrix = pose.views[0].projectionMatrix
             context.viewport(

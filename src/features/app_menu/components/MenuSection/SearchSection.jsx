@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, forwardRef, useImperativeHandle, useCallback } from "react";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -9,12 +9,14 @@ import Stack from "@mui/system/Stack";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 
-export default function SearchSection(props) {
-    const [options, setOptions] = useState(props.options)
+const SearchSection = forwardRef((props, _ref) => {
+    const options = props.options
+    const toggleStates = props.options
     const [selected, setSelected] = useState([])
     const [allowedOptions, setAllowed] = useState([])
     const [deniedOptions, setDenied] = useState([])
-    const toggleHandler = (label, state) => {
+
+    const toggleHandler = useCallback((label, state) => {
         if (state === 'Allowed') {
             setAllowed(allowedOpts => [...allowedOpts, label])
         } else if (state === 'Denied') {
@@ -23,10 +25,15 @@ export default function SearchSection(props) {
         } else {
             setDenied(deniedOpts => deniedOpts.filter(opt => opt != label))
         }
-    }
+    })
+
+    useImperativeHandle(_ref, () => ({
+        getAllowedState: () => {return allowedOptions},
+        getDeniedState: () => {return deniedOptions}
+    }))
 
     return (
-        <Accordion allowed={allowedOptions} denied={deniedOptions}>
+        <Accordion defaultExpanded={props.expanded}>
             <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls="panel1a-content">
@@ -48,6 +55,7 @@ export default function SearchSection(props) {
 
                     <Stack sx={{ flexWrap: 'wrap', gap: 1, margin: 1 }} direction="row" spacing={1}>
                         {selected.map(val => <ToggleChip
+                            stateProps={toggleStates}
                             key={val}
                             label={val}
                             onToggle={toggleHandler}
@@ -59,4 +67,6 @@ export default function SearchSection(props) {
         </Accordion>
     )
 
-}
+})
+
+export default React.memo(SearchSection)
