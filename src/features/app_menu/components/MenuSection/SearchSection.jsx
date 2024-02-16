@@ -16,30 +16,29 @@ const SearchSection = forwardRef((props, _ref) => {
 
     const toggleHandler = (e) => {
         const label = e.currentTarget.textContent
-        console.log("label ", label)
-        console.log("selected before ", selected)
-        setSelected((prevState) => {
-            ({
-                ...prevState,
-                [label]: (prevState[label] + 1) % toggleStates.length
-            })
-        })
+        setSelected((prevState) => ({
+            ...selected,
+            [label]: (prevState[label] + 1) % toggleStates.length
+        }))
         console.log("selected after", selected)
     }
 
     const deleteHandler = (e) => {
         const label = e.target.parentNode.innerText
-        setSelected((prevState) => {
+        console.log("delete ", selected)
+        setSelected(
             Object.keys(selected).filter(key => key != label).reduce((newObj, key) => {
                 newObj[key] = selected[key]
                 return newObj
-            })
-        })
+            }, {})
+        )
     }
 
     useImperativeHandle(_ref, () => ({
-        getChipStates: () => { return selected }
+        getChipStates: () => { return selected },
+        clearChipStates: () => {setSelected([])}
     }))
+
     console.log("selected ", selected)
     return (
         <Accordion defaultExpanded={props.expanded}>
@@ -56,7 +55,7 @@ const SearchSection = forwardRef((props, _ref) => {
                         renderTags={() => { }}
                         filterSelectedOptions
                         value={selected ? Object.keys(selected) : []}
-                        onChange={(e) => {setSelected((prevState) => ({...prevState, [e.target.innerText]: 0}))}}
+                        onChange={(e) => { setSelected((prevState) => ({ ...prevState, [e.target.innerText]: 0 })) }}
                         options={props.options}
                         size="small"
                         renderInput={(params) => <TextField variant="filled" {...params} label={'Search ' + props.sectionTitle} />}

@@ -21,7 +21,8 @@ const BasicSection = forwardRef((props, _ref) => {
     }, [optionState])
 
     useImperativeHandle(_ref, () => ({
-        getChipStates: () => {return optionState}
+        getChipStates: () => {return optionState},
+        clearChipStates: () => {setOptionState(Object.fromEntries(props.options.map(k => [k, 0])))}
     }))
 
     return (
