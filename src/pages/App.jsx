@@ -1,9 +1,20 @@
 import { AppMenu } from '../features/app_menu/AppMenu'
 import { AugmentSystem } from '../features/augment_system/AugmentSystem'
-import React, { useState } from 'react'
+import React, { memo, useState } from 'react'
 import { XR, ARButton } from '@react-three/xr'
 import { Canvas } from '@react-three/fiber'
 import './App.css'
+import { ThemeProvider, createTheme } from '@mui/material/styles'
+
+const theme = createTheme()
+
+const ThemedAppMenu = memo((props) => {
+  return (
+    <ThemeProvider theme={theme} >
+      <AppMenu setClasses={props.setSearchClasses} />
+    </ThemeProvider>
+  )
+})
 
 export default function App() {
   const [searchClasses, setSearchClasses] = useState([])
@@ -13,7 +24,7 @@ export default function App() {
   return (
     <>
       {isPresenting ?
-        <AppMenu setClasses={setSearchClasses} /> :
+        <ThemedAppMenu setClasses={setSearchClasses} /> :
         <ARButton
           enterOnly={true}
           sessionInit={{

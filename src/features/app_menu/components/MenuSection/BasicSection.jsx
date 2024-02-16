@@ -1,4 +1,4 @@
-import React, { useState, forwardRef, useImperativeHandle, useCallback } from "react";
+import React, { useState, forwardRef, useImperativeHandle } from "react";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -12,13 +12,13 @@ const BasicSection = forwardRef((props, _ref) => {
     const [optionState, setOptionState] = useState(Object.fromEntries(props.options.map(k => [k, 0])))
     const toggleStates = props.toggleStates
     
-    const toggleHandler = useCallback((e) => {
+    const toggleHandler = (e) => {
         const label = e.currentTarget.textContent
         setOptionState((prevState) => ({
             ...optionState,
             [label]: (prevState[label] + 1) % toggleStates.length
         }))
-    }, [optionState])
+    }
 
     useImperativeHandle(_ref, () => ({
         getChipStates: () => {return optionState},

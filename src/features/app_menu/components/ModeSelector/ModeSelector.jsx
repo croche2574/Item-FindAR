@@ -7,15 +7,12 @@ import Slider from 'react-slick'
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import './ModeSelector.css'
-const fabStyle = {
-    //position: 'absolute',
-};
 
 const ModeButton = memo((props) => {
     const buttonData = props.data
 
     return (
-        <Fab sx={buttonData.sx} color={buttonData.id === props.index ? buttonData.color : 'default'} size='medium' onClick={buttonData.handler} >
+        <Fab color={buttonData.id === props.index ? buttonData.color : 'default'} size='medium' onClick={buttonData.handler} >
             {buttonData.symbol}
         </Fab>
     )
@@ -30,7 +27,6 @@ const ModeSelector = memo((props) => {
             mode: 'Info',
             color: 'primary',
             id: 0,
-            sx: fabStyle,
             handler: props.infoHandler
         },
         {
@@ -38,7 +34,6 @@ const ModeSelector = memo((props) => {
             mode: 'Search',
             color: 'primary',
             id: 1,
-            sx: fabStyle,
             handler: props.searchHandler
         },
         {
@@ -46,7 +41,6 @@ const ModeSelector = memo((props) => {
             mode: 'Exit',
             color: 'error',
             id: 2,
-            sx: fabStyle,
             handler: props.closeHandler
         }
     ]

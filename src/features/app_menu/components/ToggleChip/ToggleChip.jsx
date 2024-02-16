@@ -4,11 +4,11 @@ import './ToggleChip.css'
 
 const ToggleChip = (props) => {
     const { stateProps, toggleHandler, label, state } = props
-    console.log("state: ", state)
     var chipProps = {
         label: label,
         val: label,
         color: stateProps[state].color,
+        icon: stateProps[state].icon,
         onClick: toggleHandler,
         onDelete: props.onDelete
     }

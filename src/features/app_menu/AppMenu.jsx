@@ -9,6 +9,10 @@ import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import DoNotDisturbAltIcon from '@mui/icons-material/DoNotDisturbAlt';
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import { useReadCypher } from 'use-neo4j'
 import { toggleSession } from '@react-three/xr'
 
@@ -23,15 +27,18 @@ const InfoMenu = memo((props) => {
     const toggleStatesAllergens = [
         {
             stateName: 'Neutral',
-            color: 'default'
+            color: 'default',
+            icon: <RadioButtonUncheckedIcon/>
         },
         {
             stateName: 'Mild',
-            color: 'warning'
+            color: 'warning',
+            icon: <ErrorOutlineIcon/>
         },
         {
             stateName: 'Severe',
-            color: 'error'
+            color: 'error',
+            icon: <DoNotDisturbAltIcon/>
         }
     ]
 
@@ -45,13 +52,20 @@ const InfoMenu = memo((props) => {
     const toggleStatesDietary = [
         {
             stateName: 'Neutral',
-            color: 'default'
+            color: 'default',
+            icon: <RadioButtonUncheckedIcon/>
         },
         {
             stateName: 'Allowed',
-            color: 'success'
+            color: 'success',
+            icon: <CheckCircleOutlineIcon/>
         }
     ]
+
+    const clearHandler = (e) => {
+        allergenSettingsRef.current.clearChipStates()
+        dietaryRestrictionsRef.current.clearChipStates()
+    }
 
     if (allergenLoading) {
         console.log("Loading")
@@ -82,6 +96,7 @@ const InfoMenu = memo((props) => {
                             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                                 Info
                             </Typography>
+                            <Button color="inherit" onClick={clearHandler}>Clear</Button>
                         </Toolbar>
                     </AppBar>
                     <BasicSection ref={allergenSettingsRef} expanded={true} sectionTitle='Allergens' options={allergenResults.map(row => row.get('a.name'))} toggleStates={toggleStatesAllergens} />
@@ -110,28 +125,40 @@ const SearchMenu = memo((props) => {
     const basicToggleStates = [
         {
             stateName: 'Neutral',
-            color: 'default'
+            color: 'default',
+            icon: <RadioButtonUncheckedIcon/>
         },
         {
             stateName: 'Allowed',
-            color: 'success'
+            color: 'success',
+            icon: <CheckCircleOutlineIcon/>
         },
         {
             stateName: 'Denied',
-            color: 'error'
+            color: 'error',
+            icon: <DoNotDisturbAltIcon/>
         }
     ]
 
     const searchToggleStates = [
         {
             stateName: 'Allowed',
-            color: 'success'
+            color: 'success',
+            icon: <CheckCircleOutlineIcon/>
         },
         {
             stateName: 'Denied',
-            color: 'error'
+            color: 'error',
+            icon: <DoNotDisturbAltIcon/>
         }
     ]
+
+    const clearHandler = (e) => {
+        ingredientRef.current.clearChipStates()
+        allergenRef.current.clearChipStates()
+        itemtagRef.current.clearChipStates()
+        itemRef.current.clearChipStates()
+    }
 
     if (ingredientLoading || allergenLoading || itemTagLoading || itemLoading) {
         console.log("Loading")
@@ -162,7 +189,7 @@ const SearchMenu = memo((props) => {
                             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                                 Search
                             </Typography>
-                            <Button color="inherit">Clear</Button>
+                            <Button color="inherit" onClick={clearHandler}>Clear</Button>
                         </Toolbar>
                     </AppBar>
                     <SearchSection ref={itemRef} sectionTitle='Items' options={itemResults.map(row => row.get('i.name'))} toggleStates={searchToggleStates} />
@@ -190,9 +217,9 @@ export const AppMenu = memo((props) => {
     return (
         <div className="AppMenu" style={menuStyle}>
             <ModeSelector
-                id='selector'
-                infoHandler={(event) => setInfoAnchorEl(event.currentTarget)}
-                searchHandler={(event) => setSearchAnchorEl(event.currentTarget)}
+                id={'selector'}
+                infoHandler={(event) => setInfoAnchorEl(event.currentTarget.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode)}
+                searchHandler={(event) => setSearchAnchorEl(event.currentTarget.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode)}
                 closeHandler={(event) => toggleSession('immersive-ar')}
             />
             <InfoMenu closeHandler={(event) => setInfoAnchorEl(null)} anchorEl={infoAnchorEl} />
