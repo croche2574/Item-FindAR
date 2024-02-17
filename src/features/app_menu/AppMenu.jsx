@@ -15,6 +15,7 @@ import DoNotDisturbAltIcon from '@mui/icons-material/DoNotDisturbAlt';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import { useReadCypher } from 'use-neo4j'
 import { toggleSession } from '@react-three/xr'
+import { UserSettingsSection } from "./components/MenuSection/UserSettingsSection.jsx";
 
 const InfoMenu = memo((props) => {
     const infoOpen = Boolean(props.anchorEl);
@@ -28,17 +29,17 @@ const InfoMenu = memo((props) => {
         {
             stateName: 'Neutral',
             color: 'default',
-            icon: <RadioButtonUncheckedIcon/>
+            icon: <RadioButtonUncheckedIcon />
         },
         {
             stateName: 'Mild',
             color: 'warning',
-            icon: <ErrorOutlineIcon/>
+            icon: <ErrorOutlineIcon />
         },
         {
             stateName: 'Severe',
             color: 'error',
-            icon: <DoNotDisturbAltIcon/>
+            icon: <DoNotDisturbAltIcon />
         }
     ]
 
@@ -53,12 +54,12 @@ const InfoMenu = memo((props) => {
         {
             stateName: 'Neutral',
             color: 'default',
-            icon: <RadioButtonUncheckedIcon/>
+            icon: <RadioButtonUncheckedIcon />
         },
         {
             stateName: 'Allowed',
             color: 'success',
-            icon: <CheckCircleOutlineIcon/>
+            icon: <CheckCircleOutlineIcon />
         }
     ]
 
@@ -94,13 +95,14 @@ const InfoMenu = memo((props) => {
                     <AppBar position="static">
                         <Toolbar>
                             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                                Info
+                                General Info
                             </Typography>
                             <Button color="inherit" onClick={clearHandler}>Clear</Button>
                         </Toolbar>
                     </AppBar>
                     <BasicSection ref={allergenSettingsRef} expanded={true} sectionTitle='Allergens' options={allergenResults.map(row => row.get('a.name'))} toggleStates={toggleStatesAllergens} />
                     <BasicSection ref={dietaryRestrictionsRef} expanded={true} sectionTitle='Dietary Restrictions' options={dietTags} toggleStates={toggleStatesDietary} />
+                    <UserSettingsSection expanded={true} sectionTitle='User Settings' setUseCookies={props.setUseCookies}/>
                 </div>
             </Popover>
         )
@@ -126,17 +128,17 @@ const SearchMenu = memo((props) => {
         {
             stateName: 'Neutral',
             color: 'default',
-            icon: <RadioButtonUncheckedIcon/>
+            icon: <RadioButtonUncheckedIcon />
         },
         {
             stateName: 'Allowed',
             color: 'success',
-            icon: <CheckCircleOutlineIcon/>
+            icon: <CheckCircleOutlineIcon />
         },
         {
             stateName: 'Denied',
             color: 'error',
-            icon: <DoNotDisturbAltIcon/>
+            icon: <DoNotDisturbAltIcon />
         }
     ]
 
@@ -144,12 +146,12 @@ const SearchMenu = memo((props) => {
         {
             stateName: 'Allowed',
             color: 'success',
-            icon: <CheckCircleOutlineIcon/>
+            icon: <CheckCircleOutlineIcon />
         },
         {
             stateName: 'Denied',
             color: 'error',
-            icon: <DoNotDisturbAltIcon/>
+            icon: <DoNotDisturbAltIcon />
         }
     ]
 
@@ -205,6 +207,7 @@ const SearchMenu = memo((props) => {
 export const AppMenu = memo((props) => {
     const [infoAnchorEl, setInfoAnchorEl] = useState(null)
     const [searchAnchorEl, setSearchAnchorEl] = useState(null)
+    const [useCookies, setUseCookies] = useState(false)
 
     const menuStyle = {
         height: '100%',
@@ -222,8 +225,8 @@ export const AppMenu = memo((props) => {
                 searchHandler={(event) => setSearchAnchorEl(event.currentTarget.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode)}
                 closeHandler={(event) => toggleSession('immersive-ar')}
             />
-            <InfoMenu closeHandler={(event) => setInfoAnchorEl(null)} anchorEl={infoAnchorEl} />
-            <SearchMenu closeHandler={(event) => setSearchAnchorEl(null)} anchorEl={searchAnchorEl} />
+            <InfoMenu closeHandler={(event) => setInfoAnchorEl(null)} anchorEl={infoAnchorEl} useCookies={useCookies} setUseCookies={setUseCookies} />
+            <SearchMenu closeHandler={(event) => setSearchAnchorEl(null)} anchorEl={searchAnchorEl} useCookies={useCookies} />
         </div>
     )
 })

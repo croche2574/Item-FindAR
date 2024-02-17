@@ -1,4 +1,4 @@
-import App from './pages/App.jsx'
+import { App } from './pages/App'
 import './styles.css'
 
 import React from "react"

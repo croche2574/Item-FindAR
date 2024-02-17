@@ -26,7 +26,7 @@ const BasicSection = forwardRef((props, _ref) => {
     }))
 
     return (
-        <Accordion defaultExpanded={props.expanded}>
+        <Accordion defaultExpanded={props.expanded} disableGutters>
             <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls="panel1a-content">

@@ -41,7 +41,7 @@ const SearchSection = forwardRef((props, _ref) => {
 
     console.log("selected ", selected)
     return (
-        <Accordion defaultExpanded={props.expanded}>
+        <Accordion defaultExpanded={props.expanded} disableGutters>
             <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls="panel1a-content">

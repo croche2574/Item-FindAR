@@ -16,7 +16,7 @@ const ThemedAppMenu = memo((props) => {
   )
 })
 
-export default function App() {
+export const App = () => {
   const [searchClasses, setSearchClasses] = useState([])
   const [isPresenting, setPresenting] = useState(false)
 
