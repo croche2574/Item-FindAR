@@ -11,7 +11,7 @@ import { objectMapToArray } from "../../../../common/ObjectMap"
 const BasicSection = forwardRef((props, _ref) => {
     const [optionState, setOptionState] = useState(Object.fromEntries(props.options.map(k => [k, 0])))
     const toggleStates = props.toggleStates
-    
+
     const toggleHandler = (e) => {
         const label = e.currentTarget.textContent
         setOptionState((prevState) => ({
@@ -21,8 +21,13 @@ const BasicSection = forwardRef((props, _ref) => {
     }
 
     useImperativeHandle(_ref, () => ({
-        getChipStates: () => {return optionState},
-        clearChipStates: () => {setOptionState(Object.fromEntries(props.options.map(k => [k, 0])))}
+        getChipStates: () => {
+            return Object.keys(optionState).filter(key => optionState[key] != 0).reduce((newObj, key) => {
+                newObj[key] = optionState[key]
+                return newObj
+            }, {})
+        },
+        clearChipStates: () => { setOptionState(Object.fromEntries(props.options.map(k => [k, 0]))) }
     }))
 
     return (
@@ -31,18 +36,18 @@ const BasicSection = forwardRef((props, _ref) => {
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls="panel1a-content">
                 <Typography>{props.sectionTitle}</Typography>
-            </AccordionSummary> 
+            </AccordionSummary>
             <AccordionDetails>
                 <Typography>
                     {props.description}
                 </Typography>
                 <Stack sx={{ flexWrap: 'wrap', gap: 1 }} direction="row" spacing={1}>
-                    {objectMapToArray(optionState, (state, label) => <ToggleChip 
-                    key={label} 
-                    stateProps={toggleStates} 
-                    toggleHandler={toggleHandler} 
-                    label={label} 
-                    state={state} />)}
+                    {objectMapToArray(optionState, (state, label) => <ToggleChip
+                        key={label}
+                        stateProps={toggleStates}
+                        toggleHandler={toggleHandler}
+                        label={label}
+                        state={state} />)}
                 </Stack>
             </AccordionDetails>
         </Accordion>

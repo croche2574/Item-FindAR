@@ -50,6 +50,7 @@
     "classnames": "^2.3.2",
     "cookie": "^0.5.0",
     "imagescript": "github:matmen/ImageScript#browser",
+    "js-cookie": "^3.0.5",
     "konva": "^9.2.2",
     "lodash": "^4.17.21",
     "material-ui-popup-state": "^5.0.9",
@@ -61,7 +62,6 @@
     "three": "^0.155.0",
     "three-mesh-ui": "^6.5.4",
     "tunnel-rat": "^0.1.2",
-    "use-cookie-state": "^2.0.1",
     "use-neo4j": "^0.3.13"
   }
 }

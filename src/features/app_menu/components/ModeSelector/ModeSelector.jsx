@@ -59,7 +59,7 @@ const ModeSelector = memo((props) => {
     }
 
     return (
-        <div style={{ width: '50%', marginTop: 'auto', marginBottom: '26px'}}>
+        <div ref={props.anchorRef} style={{ width: '50%', marginTop: 'auto', marginBottom: '26px'}}>
             <Slider {...settings} >
                 <ModeButton data={data[0]} index={index} />
                 <ModeButton data={data[1]} index={index} />

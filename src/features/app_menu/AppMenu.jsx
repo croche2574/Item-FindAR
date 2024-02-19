@@ -68,6 +68,15 @@ const InfoMenu = memo((props) => {
         dietaryRestrictionsRef.current.clearChipStates()
     }
 
+    const closeHandler = () => {
+        props.setUserSettings({
+            allergens: allergenSettingsRef.current.getChipStates(),
+            dietary: dietaryRestrictionsRef.current.getChipStates()
+        })
+        props.setAnchorEl(null)
+        
+    }
+
     if (allergenLoading) {
         console.log("Loading")
         return (
@@ -82,7 +91,7 @@ const InfoMenu = memo((props) => {
                 id={infoID}
                 open={infoOpen}
                 anchorEl={props.anchorEl}
-                onClose={props.closeHandler}
+                onClose={closeHandler}
                 anchorOrigin={{
                     vertical: 'top',
                     horizontal: 'center',
@@ -102,7 +111,7 @@ const InfoMenu = memo((props) => {
                     </AppBar>
                     <BasicSection ref={allergenSettingsRef} expanded={true} sectionTitle='Allergens' options={allergenResults.map(row => row.get('a.name'))} toggleStates={toggleStatesAllergens} />
                     <BasicSection ref={dietaryRestrictionsRef} expanded={true} sectionTitle='Dietary Restrictions' options={dietTags} toggleStates={toggleStatesDietary} />
-                    <UserSettingsSection expanded={true} sectionTitle='User Settings' setUseCookies={props.setUseCookies}/>
+                    <UserSettingsSection expanded={true} sectionTitle='User Settings' setUseCookies={props.setUseCookies} />
                 </div>
             </Popover>
         )
@@ -162,6 +171,16 @@ const SearchMenu = memo((props) => {
         itemRef.current.clearChipStates()
     }
 
+    const closeHandler = (e) => {
+        props.setSearchClasses({
+            ingredients: ingredientRef.current.getChipStates(),
+            allergens: allergenRef.current.getChipStates(),
+            itemTags: itemtagRef.current.getChipStates(),
+            items: itemRef.current.getChipStates()
+        })
+        props.setAnchorEl(null)
+    }
+
     if (ingredientLoading || allergenLoading || itemTagLoading || itemLoading) {
         console.log("Loading")
         return (
@@ -176,7 +195,7 @@ const SearchMenu = memo((props) => {
                 id={searchID}
                 open={searchOpen}
                 anchorEl={props.anchorEl}
-                onClose={props.closeHandler}
+                onClose={closeHandler}
                 anchorOrigin={{
                     vertical: 'top',
                     horizontal: 'center'
@@ -207,7 +226,7 @@ const SearchMenu = memo((props) => {
 export const AppMenu = memo((props) => {
     const [infoAnchorEl, setInfoAnchorEl] = useState(null)
     const [searchAnchorEl, setSearchAnchorEl] = useState(null)
-    const [useCookies, setUseCookies] = useState(false)
+    const anchorRef = useRef()
 
     const menuStyle = {
         height: '100%',
@@ -221,12 +240,21 @@ export const AppMenu = memo((props) => {
         <div className="AppMenu" style={menuStyle}>
             <ModeSelector
                 id={'selector'}
-                infoHandler={(event) => setInfoAnchorEl(event.currentTarget.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode)}
-                searchHandler={(event) => setSearchAnchorEl(event.currentTarget.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode)}
+                anchorRef={anchorRef}
+                infoHandler={(event) => setInfoAnchorEl(anchorRef.current)}
+                searchHandler={(event) => setSearchAnchorEl(anchorRef.current)}
                 closeHandler={(event) => toggleSession('immersive-ar')}
             />
-            <InfoMenu closeHandler={(event) => setInfoAnchorEl(null)} anchorEl={infoAnchorEl} useCookies={useCookies} setUseCookies={setUseCookies} />
-            <SearchMenu closeHandler={(event) => setSearchAnchorEl(null)} anchorEl={searchAnchorEl} useCookies={useCookies} />
+            <InfoMenu
+                anchorEl={infoAnchorEl}
+                setAnchorEl={setInfoAnchorEl}
+                setUserSettings={props.setUserSettings}
+                userSettings={props.userSettings}
+                setUseCookies={props.setUseCookies} />
+            <SearchMenu
+                setClasses={props.setClasses}
+                anchorEl={searchAnchorEl} 
+                setAnchorEl={setSearchAnchorEl} />
         </div>
     )
 })

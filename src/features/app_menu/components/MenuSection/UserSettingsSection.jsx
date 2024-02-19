@@ -8,9 +8,9 @@ import { FormGroup, FormControlLabel, Switch, FormHelperText } from "@mui/materi
 
 export const UserSettingsSection = memo((props) => {
     const handleCookieSwitch = () => {
-        props.setUseCookies((prevState) => {!prevState})
+        props.setUseCookies((prevState) => {return !prevState})
     }
-    
+
     return (
         <Accordion defaultExpanded={props.expanded} disableGutters>
             <AccordionSummary

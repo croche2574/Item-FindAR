@@ -1,30 +1,32 @@
 import { AppMenu } from '../features/app_menu/AppMenu'
 import { AugmentSystem } from '../features/augment_system/AugmentSystem'
-import React, { memo, useState } from 'react'
+import React, { memo, useEffect, useState } from 'react'
 import { XR, ARButton } from '@react-three/xr'
 import { Canvas } from '@react-three/fiber'
 import './App.css'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
+import { useCookieState } from '../features/app_menu/hooks/UseCookieState.jsx';
 
 const theme = createTheme()
 
 const ThemedAppMenu = memo((props) => {
   return (
     <ThemeProvider theme={theme} >
-      <AppMenu setClasses={props.setSearchClasses} />
+      <AppMenu {...props} />
     </ThemeProvider>
   )
 })
 
-export const App = () => {
-  const [searchClasses, setSearchClasses] = useState([])
-  const [isPresenting, setPresenting] = useState(false)
+export const App = memo((props) => {
+  const [searchClasses, setSearchClasses] = useState({})
+  const [isPresenting, setPresenting] = useState(false)  
+  const [userSettings, setUserSettings, setEnabled] = useCookieState('usrSettings', {})
 
   //console.log(isPresenting)
   return (
     <>
       {isPresenting ?
-        <ThemedAppMenu setClasses={setSearchClasses} /> :
+        <ThemedAppMenu setClasses={setSearchClasses} setUseCookies={setEnabled} userSettings={userSettings} setUserSettings={setUserSettings}  /> :
         <ARButton
           enterOnly={true}
           sessionInit={{
@@ -40,4 +42,4 @@ export const App = () => {
       </Canvas>
     </>
   )
-}
+})
