@@ -37,7 +37,7 @@ const SearchSection = forwardRef((props, _ref) => {
     useImperativeHandle(_ref, () => ({
         getChipStates: () => { return selected },
         clearChipStates: () => {setSelected([])}
-    }))
+    }), [selected])
 
     console.log("selected ", selected)
     return (

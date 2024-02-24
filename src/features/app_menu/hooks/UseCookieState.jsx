@@ -40,5 +40,5 @@ export const useCookieState = (key, initialValue) => {
         }
     }, [enabled])
 
-    return [value, setNextValue, setEnabled]
+    return [value, setNextValue, enabled, setEnabled]
 }

@@ -1,4 +1,4 @@
-import React, { useRef, useState, memo } from "react";
+import React, { useRef, useState, memo, useEffect, useCallback } from "react";
 import BasicSection from "./components/MenuSection/BasicSection.jsx";
 import SearchSection from "./components/MenuSection/SearchSection.jsx";
 import ModeSelector from "./components/ModeSelector/ModeSelector.jsx";
@@ -16,14 +16,15 @@ import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import { useReadCypher } from 'use-neo4j'
 import { toggleSession } from '@react-three/xr'
 import { UserSettingsSection } from "./components/MenuSection/UserSettingsSection.jsx";
+import { useCookieState } from "./hooks/UseCookieState.jsx";
 
 const InfoMenu = memo((props) => {
     const infoOpen = Boolean(props.anchorEl);
     const infoID = infoOpen ? 'simple-popover' : undefined;
-
-    const allergenSettingsRef = useRef([])
-    const dietaryRestrictionsRef = useRef([])
-
+    const [menuState, setMenuState, enabled, setEnabled] = useCookieState('usrSettings', {})
+    const allergenSettingsRef = useRef()
+    const dietaryRestrictionsRef = useRef()
+    
     const { loading: allergenLoading, records: allergenResults } = useReadCypher('MATCH (a:Allergen) RETURN a.name ORDER BY a.name')
     const toggleStatesAllergens = [
         {
@@ -66,15 +67,11 @@ const InfoMenu = memo((props) => {
     const clearHandler = (e) => {
         allergenSettingsRef.current.clearChipStates()
         dietaryRestrictionsRef.current.clearChipStates()
+        setEnabled(false)
     }
 
-    const closeHandler = () => {
-        props.setUserSettings({
-            allergens: allergenSettingsRef.current.getChipStates(),
-            dietary: dietaryRestrictionsRef.current.getChipStates()
-        })
+    const closeHandler = () => { 
         props.setAnchorEl(null)
-        
     }
 
     if (allergenLoading) {
@@ -86,6 +83,7 @@ const InfoMenu = memo((props) => {
                 key={'loadmessage'} />
         )
     } else if (allergenResults) {
+
         return (
             <Popover
                 id={infoID}
@@ -109,9 +107,9 @@ const InfoMenu = memo((props) => {
                             <Button color="inherit" onClick={clearHandler}>Clear</Button>
                         </Toolbar>
                     </AppBar>
-                    <BasicSection ref={allergenSettingsRef} expanded={true} sectionTitle='Allergens' options={allergenResults.map(row => row.get('a.name'))} toggleStates={toggleStatesAllergens} />
-                    <BasicSection ref={dietaryRestrictionsRef} expanded={true} sectionTitle='Dietary Restrictions' options={dietTags} toggleStates={toggleStatesDietary} />
-                    <UserSettingsSection expanded={true} sectionTitle='User Settings' setUseCookies={props.setUseCookies} />
+                    <BasicSection ref={allergenSettingsRef} expanded={true} sectionTitle='Allergens' options={allergenResults.map(row => row.get('a.name'))} menuState={menuState} setMenuState={setMenuState} toggleStates={toggleStatesAllergens} />
+                    <BasicSection ref={dietaryRestrictionsRef} expanded={true} sectionTitle='Dietary Restrictions' options={dietTags} menuState={menuState} setMenuState={setMenuState} toggleStates={toggleStatesDietary} />
+                    <UserSettingsSection expanded={true} sectionTitle='User Settings' setUseCookies={setEnabled} cookieState={enabled} />
                 </div>
             </Popover>
         )
@@ -180,6 +178,8 @@ const SearchMenu = memo((props) => {
         })
         props.setAnchorEl(null)
     }
+
+
 
     if (ingredientLoading || allergenLoading || itemTagLoading || itemLoading) {
         console.log("Loading")

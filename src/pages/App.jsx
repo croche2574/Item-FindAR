@@ -20,7 +20,7 @@ const ThemedAppMenu = memo((props) => {
 export const App = memo((props) => {
   const [searchClasses, setSearchClasses] = useState({})
   const [isPresenting, setPresenting] = useState(false)  
-  const [userSettings, setUserSettings, setEnabled] = useCookieState('usrSettings', {})
+  const [userSettings, setUserSettings, setEnabled] = useCookieState('usrSettings', {allergens: {}, dietary: {}})
 
   //console.log(isPresenting)
   return (

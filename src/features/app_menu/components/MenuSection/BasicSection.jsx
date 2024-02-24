@@ -1,4 +1,4 @@
-import React, { useState, forwardRef, useImperativeHandle } from "react";
+import React, { useState, forwardRef, useImperativeHandle, useEffect } from "react";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -9,45 +9,53 @@ import Stack from "@mui/system/Stack";
 import { objectMapToArray } from "../../../../common/ObjectMap"
 
 const BasicSection = forwardRef((props, _ref) => {
-    const [optionState, setOptionState] = useState(Object.fromEntries(props.options.map(k => [k, 0])))
-    const toggleStates = props.toggleStates
+    const {expanded, sectionTitle, options, menuState, setMenuState, toggleStates} = props
+
+    useEffect(() => {
+        console.log("menu", menuState)
+        if (!menuState[sectionTitle]) {
+            setMenuState({
+                ...menuState,
+                [sectionTitle]: Object.fromEntries(options.map(k => [k, 0]))
+            })
+        }
+    }, [options])
 
     const toggleHandler = (e) => {
         const label = e.currentTarget.textContent
-        setOptionState((prevState) => ({
-            ...optionState,
-            [label]: (prevState[label] + 1) % toggleStates.length
-        }))
+        setMenuState((prevState) => {return {
+            ...menuState,
+            [sectionTitle]: { ...menuState[sectionTitle], [label]: (prevState[sectionTitle][label] + 1) % toggleStates.length }
+        }})
     }
 
     useImperativeHandle(_ref, () => ({
-        getChipStates: () => {
-            return Object.keys(optionState).filter(key => optionState[key] != 0).reduce((newObj, key) => {
-                newObj[key] = optionState[key]
-                return newObj
-            }, {})
-        },
-        clearChipStates: () => { setOptionState(Object.fromEntries(props.options.map(k => [k, 0]))) }
-    }))
+        clearChipStates: () => {
+            setMenuState((prevState) => {return {
+                ...prevState,
+                [sectionTitle]: Object.fromEntries(options.map(k => [k, 0]))
+            }})
+        }
+    }), [])
 
     return (
-        <Accordion defaultExpanded={props.expanded} disableGutters>
+        <Accordion defaultExpanded={expanded} disableGutters>
             <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls="panel1a-content">
-                <Typography>{props.sectionTitle}</Typography>
+                <Typography>{sectionTitle}</Typography>
             </AccordionSummary>
             <AccordionDetails>
                 <Typography>
                     {props.description}
                 </Typography>
                 <Stack sx={{ flexWrap: 'wrap', gap: 1 }} direction="row" spacing={1}>
-                    {objectMapToArray(optionState, (state, label) => <ToggleChip
+                    {menuState[sectionTitle] ? objectMapToArray(menuState[sectionTitle], (state, label) => <ToggleChip
                         key={label}
                         stateProps={toggleStates}
                         toggleHandler={toggleHandler}
                         label={label}
-                        state={state} />)}
+                        state={state} />) : []}
                 </Stack>
             </AccordionDetails>
         </Accordion>
