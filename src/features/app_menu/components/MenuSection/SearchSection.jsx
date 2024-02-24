@@ -1,4 +1,4 @@
-import React, { useState, forwardRef, useImperativeHandle } from "react";
+import React, { useCallback } from "react";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -10,42 +10,40 @@ import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import { objectMapToArray } from "../../../../common/ObjectMap.jsx";
 
-const SearchSection = forwardRef((props, _ref) => {
-    const toggleStates = props.toggleStates
-    const [selected, setSelected] = useState({})
+const SearchSection = (props) => {
+    const { expanded, sectionTitle, options, menuState, setMenuState, toggleStates } = props
 
-    const toggleHandler = (e) => {
+    const toggleHandler = useCallback((e) => {
         const label = e.currentTarget.textContent
-        setSelected((prevState) => ({
-            ...selected,
-            [label]: (prevState[label] + 1) % toggleStates.length
-        }))
-        console.log("selected after", selected)
-    }
+        setMenuState((prevState) => {
+            return {
+                ...prevState,
+                [sectionTitle]: { ...prevState[sectionTitle], [label]: (prevState[sectionTitle][label] + 1) % toggleStates.length }
+            }
+        })
+    }, [])
 
-    const deleteHandler = (e) => {
+    const deleteHandler = useCallback((e) => {
         const label = e.target.parentNode.innerText
-        console.log("delete ", selected)
-        setSelected(
-            Object.keys(selected).filter(key => key != label).reduce((newObj, key) => {
-                newObj[key] = selected[key]
-                return newObj
-            }, {})
+        console.log('delete ', label)
+        setMenuState((prevState) => {
+            return {
+                ...prevState,
+                [sectionTitle]: Object.keys(prevState[sectionTitle]).filter(key => key != label).reduce((newObj, key) => {
+                    newObj[key] = prevState[sectionTitle][key]
+                    return newObj
+                }, {})
+            }
+        }
         )
-    }
+    }, [])
 
-    useImperativeHandle(_ref, () => ({
-        getChipStates: () => { return selected },
-        clearChipStates: () => {setSelected([])}
-    }), [selected])
-
-    console.log("selected ", selected)
     return (
-        <Accordion defaultExpanded={props.expanded} disableGutters>
+        <Accordion defaultExpanded={expanded} disableGutters>
             <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls="panel1a-content">
-                <Typography>{props.sectionTitle}</Typography>
+                <Typography>{sectionTitle}</Typography>
             </AccordionSummary>
             <AccordionDetails>
                 <Stack direction="column">
@@ -54,15 +52,23 @@ const SearchSection = forwardRef((props, _ref) => {
                         id="search-box"
                         renderTags={() => { }}
                         filterSelectedOptions
-                        value={selected ? Object.keys(selected) : []}
-                        onChange={(e) => { setSelected((prevState) => ({ ...prevState, [e.target.innerText]: 0 })) }}
-                        options={props.options}
+                        value={menuState[sectionTitle] ? Object.keys(menuState[sectionTitle]) : []}
+                        onChange={(e) => {
+                            setMenuState((prevState) => {
+                                return {
+                                    ...prevState,
+                                    [sectionTitle]: { ...prevState[sectionTitle], [e.target.innerText]: 0 }
+                                }
+                            })
+                        }
+                        }
+                        options={options}
                         size="small"
-                        renderInput={(params) => <TextField variant="filled" {...params} label={'Search ' + props.sectionTitle} />}
+                        renderInput={(params) => <TextField variant="filled" {...params} label={'Search ' + sectionTitle} />}
                     />
 
                     <Stack sx={{ flexWrap: 'wrap', gap: 1, margin: 1 }} direction="row" spacing={1}>
-                        {selected && objectMapToArray(selected, (state, label) => <ToggleChip
+                        {menuState[sectionTitle] && objectMapToArray(menuState[sectionTitle], (state, label) => <ToggleChip
                             key={label}
                             stateProps={toggleStates}
                             toggleHandler={toggleHandler}
@@ -74,6 +80,6 @@ const SearchSection = forwardRef((props, _ref) => {
             </AccordionDetails>
         </Accordion>
     )
-})
+}
 
 export default React.memo(SearchSection)

@@ -1,4 +1,4 @@
-import React, { useRef, useState, memo, useEffect, useCallback } from "react";
+import React, { useRef, useState, memo, useCallback } from "react";
 import BasicSection from "./components/MenuSection/BasicSection.jsx";
 import SearchSection from "./components/MenuSection/SearchSection.jsx";
 import ModeSelector from "./components/ModeSelector/ModeSelector.jsx";
@@ -24,7 +24,7 @@ const InfoMenu = memo((props) => {
     const [menuState, setMenuState, enabled, setEnabled] = useCookieState('usrSettings', {})
     const allergenSettingsRef = useRef()
     const dietaryRestrictionsRef = useRef()
-    
+
     const { loading: allergenLoading, records: allergenResults } = useReadCypher('MATCH (a:Allergen) RETURN a.name ORDER BY a.name')
     const toggleStatesAllergens = [
         {
@@ -64,15 +64,16 @@ const InfoMenu = memo((props) => {
         }
     ]
 
-    const clearHandler = (e) => {
+    const clearHandler = useCallback((e) => {
         allergenSettingsRef.current.clearChipStates()
         dietaryRestrictionsRef.current.clearChipStates()
         setEnabled(false)
-    }
+    }, [])
 
-    const closeHandler = () => { 
+    const closeHandler = useCallback(() => {
+        //Update allergen state
         props.setAnchorEl(null)
-    }
+    }, [])
 
     if (allergenLoading) {
         console.log("Loading")
@@ -123,13 +124,10 @@ const SearchMenu = memo((props) => {
     const { loading: allergenLoading, records: allergenResults } = useReadCypher('MATCH (a:Allergen) RETURN a.name ORDER BY a.name')
     const { loading: itemTagLoading, records: itemTagResults } = useReadCypher('MATCH (t:ItemTag) RETURN t.name ORDER BY t.name')
 
-    const ingredientRef = useRef([])
-    const allergenRef = useRef([])
-    const itemtagRef = useRef([])
-    const itemRef = useRef([])
-
     const searchOpen = Boolean(props.anchorEl)
     const searchID = searchOpen ? 'simple-popover' : undefined;
+    const [menuState, setMenuState] = useState({})
+    const allergenRef = useRef()
 
     const basicToggleStates = [
         {
@@ -162,22 +160,15 @@ const SearchMenu = memo((props) => {
         }
     ]
 
-    const clearHandler = (e) => {
-        ingredientRef.current.clearChipStates()
+    const clearHandler = useCallback((e) => {
+        setMenuState({})
         allergenRef.current.clearChipStates()
-        itemtagRef.current.clearChipStates()
-        itemRef.current.clearChipStates()
-    }
+    }, [])
 
-    const closeHandler = (e) => {
-        props.setSearchClasses({
-            ingredients: ingredientRef.current.getChipStates(),
-            allergens: allergenRef.current.getChipStates(),
-            itemTags: itemtagRef.current.getChipStates(),
-            items: itemRef.current.getChipStates()
-        })
+    const closeHandler = useCallback((e) => {
+        //Update class state
         props.setAnchorEl(null)
-    }
+    }, [])
 
 
 
@@ -213,10 +204,10 @@ const SearchMenu = memo((props) => {
                             <Button color="inherit" onClick={clearHandler}>Clear</Button>
                         </Toolbar>
                     </AppBar>
-                    <SearchSection ref={itemRef} sectionTitle='Items' options={itemResults.map(row => row.get('i.name'))} toggleStates={searchToggleStates} />
-                    <BasicSection ref={allergenRef} sectionTitle='Allergens' options={allergenResults.map(row => row.get('a.name'))} toggleStates={basicToggleStates} />
-                    <SearchSection ref={itemtagRef} sectionTitle='Item Tags' options={itemTagResults.map(row => row.get('t.name'))} toggleStates={searchToggleStates} />
-                    <SearchSection ref={ingredientRef} sectionTitle='Ingredients' options={ingredientResults.map(row => row.get('in.name'))} toggleStates={searchToggleStates} />
+                    <SearchSection expanded={true} sectionTitle='Items' options={itemResults.map(row => row.get('i.name'))} menuState={menuState} setMenuState={setMenuState} toggleStates={searchToggleStates} />
+                    <BasicSection ref={allergenRef} expanded={true} sectionTitle='Allergens' options={allergenResults.map(row => row.get('a.name'))} menuState={menuState} setMenuState={setMenuState} toggleStates={basicToggleStates} />
+                    <SearchSection expanded={true} sectionTitle='Item Tags' options={itemTagResults.map(row => row.get('t.name'))} menuState={menuState} setMenuState={setMenuState} toggleStates={searchToggleStates} />
+                    <SearchSection expanded={true} sectionTitle='Ingredients' options={ingredientResults.map(row => row.get('in.name'))} menuState={menuState} setMenuState={setMenuState} toggleStates={searchToggleStates} />
                 </div>
             </Popover>
         )
@@ -253,7 +244,7 @@ export const AppMenu = memo((props) => {
                 setUseCookies={props.setUseCookies} />
             <SearchMenu
                 setClasses={props.setClasses}
-                anchorEl={searchAnchorEl} 
+                anchorEl={searchAnchorEl}
                 setAnchorEl={setSearchAnchorEl} />
         </div>
     )
