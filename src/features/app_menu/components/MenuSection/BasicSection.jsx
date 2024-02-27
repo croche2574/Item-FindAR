@@ -9,34 +9,34 @@ import Stack from "@mui/system/Stack";
 import { objectMapToArray } from "../../../../common/ObjectMap"
 
 const BasicSection = forwardRef((props, _ref) => {
-    const {expanded, sectionTitle, options, menuState, setMenuState, toggleStates} = props
+    const { expanded, sectionTitle, options, menuState, setMenuState, toggleStates } = props
 
     useEffect(() => {
-        console.log("menu", menuState)
         if (!menuState[sectionTitle]) {
             setMenuState({
                 ...menuState,
                 [sectionTitle]: Object.fromEntries(options.map(k => [k, 0]))
             })
         }
-    }, [options])
+    }, [menuState])
 
     const toggleHandler = useCallback((e) => {
         const label = e.currentTarget.textContent
-        setMenuState((prevState) => {return {
-            ...prevState,
-            [sectionTitle]: { ...prevState[sectionTitle], [label]: (prevState[sectionTitle][label] + 1) % toggleStates.length }
-        }})
-    }, [])
+        setMenuState({
+            ...menuState,
+            [sectionTitle]: { ...menuState[sectionTitle], [label]: (menuState[sectionTitle][label] + 1) % toggleStates.length }
+        })
+    }, [menuState])
 
     useImperativeHandle(_ref, () => ({
         clearChipStates: () => {
-            setMenuState((prevState) => {return {
-                ...prevState,
+            setMenuState({
+                ...menuState,
                 [sectionTitle]: Object.fromEntries(options.map(k => [k, 0]))
-            }})
+
+            })
         }
-    }), [])
+    }), [menuState])
 
     return (
         <Accordion defaultExpanded={expanded} disableGutters>

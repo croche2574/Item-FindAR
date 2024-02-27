@@ -5,7 +5,6 @@ import { XR, ARButton } from '@react-three/xr'
 import { Canvas } from '@react-three/fiber'
 import './App.css'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
-import { useCookieState } from '../features/app_menu/hooks/UseCookieState.jsx';
 
 const theme = createTheme()
 
@@ -18,15 +17,23 @@ const ThemedAppMenu = memo((props) => {
 })
 
 export const App = memo((props) => {
-  const [searchClasses, setSearchClasses] = useState({})
-  const [isPresenting, setPresenting] = useState(false)  
-  const [userSettings, setUserSettings, setEnabled] = useCookieState('usrSettings', {allergens: {}, dietary: {}})
+  const [searchClasses, setSearchClasses] = useState([])
+  const [userInfo, setUserInfo] = useState({})
+  const [isPresenting, setPresenting] = useState(false)
+
+  useEffect(() => {
+    console.log('User settings: ', userInfo)
+  }, [userInfo])
+
+  useEffect(() => {
+    console.log('Classes set: ', searchClasses)
+  }, [searchClasses])
 
   //console.log(isPresenting)
   return (
     <>
       {isPresenting ?
-        <ThemedAppMenu setClasses={setSearchClasses} setUseCookies={setEnabled} userSettings={userSettings} setUserSettings={setUserSettings}  /> :
+        <ThemedAppMenu setClasses={setSearchClasses} setUserInfo={setUserInfo} /> :
         <ARButton
           enterOnly={true}
           sessionInit={{
@@ -35,7 +42,7 @@ export const App = memo((props) => {
           }} />}
       <Canvas>
         <XR referenceSpace="local">
-          <AugmentSystem classes={searchClasses} setPresenting={setPresenting} />
+          <AugmentSystem classes={searchClasses} settings={userInfo} setPresenting={setPresenting} />
           <ambientLight />
           <pointLight position={[10, 10, 10]} />
         </XR>

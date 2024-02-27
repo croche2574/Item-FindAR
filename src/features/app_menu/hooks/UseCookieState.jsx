@@ -6,7 +6,11 @@ export const useCookieState = (key, initialValue) => {
         read: (value, name) => {return JSON.parse(value)},
         write: (value, name) => {return JSON.stringify(value)}
     })
-    const [enabled, setEnabled] = useState(Boolean(cookie.get(key)))
+    const [enabled, setEnabled] = useState(false)
+
+    useEffect(() => {
+        if (Boolean(cookie.get(key))) {setEnabled(true)}
+    }, [])
 
     const getCookieValue = ({
         key,
@@ -28,7 +32,6 @@ export const useCookieState = (key, initialValue) => {
 
     const setNextValue = (value) => {
         setValue(value)
-        if (enabled) {cookie.set(key, value)}
     }
 
     useEffect(() => {
@@ -39,6 +42,8 @@ export const useCookieState = (key, initialValue) => {
             cookie.remove(key);
         }
     }, [enabled])
+
+    if (enabled) {cookie.set(key, value)}
 
     return [value, setNextValue, enabled, setEnabled]
 }

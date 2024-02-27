@@ -166,9 +166,9 @@ const SearchMenu = memo((props) => {
     }, [])
 
     const closeHandler = useCallback((e) => {
-        //Update class state
+        props.setClasses()
         props.setAnchorEl(null)
-    }, [])
+    }, [menuState])
 
 
 
@@ -218,7 +218,6 @@ export const AppMenu = memo((props) => {
     const [infoAnchorEl, setInfoAnchorEl] = useState(null)
     const [searchAnchorEl, setSearchAnchorEl] = useState(null)
     const anchorRef = useRef()
-
     const menuStyle = {
         height: '100%',
         display: 'flex',
@@ -226,6 +225,26 @@ export const AppMenu = memo((props) => {
         alignItems: 'center',
         flexDirection: 'column',
     }
+    const dietMapping = {
+        Gluten: 'exists((item)-[:TAGGED_AS]-(:ItemTag {name: \'Gluten Free\'}))',
+        Kosher: 'exists((item)-[:TAGGED_AS]-(:ItemTag {name: \'Kosher\'}))',
+        Lactose: 'exists((item)-[:TAGGED_AS]-(:ItemTag {name: \'Lactose Free\'}))',
+        Vegan: 'exists((item)-[:TAGGED_AS]-(:ItemTag {name: \'Vegan\'}))',
+        Vegetarian: 'exists((item)-[:TAGGED_AS]-(:ItemTag {name: \'Vegetarian\'}))'
+    }
+
+    const [query, setQuery] = useState()
+
+    const formatInfo = useCallback((state) => {
+        const allergens = state.allergens
+        const dietary = ""
+        
+        props.setUserInfo()
+    }, [])
+
+    const formatClasses = useCallback((state) => {
+
+    }, [])
 
     return (
         <div className="AppMenu" style={menuStyle}>
@@ -239,13 +258,13 @@ export const AppMenu = memo((props) => {
             <InfoMenu
                 anchorEl={infoAnchorEl}
                 setAnchorEl={setInfoAnchorEl}
-                setUserSettings={props.setUserSettings}
-                userSettings={props.userSettings}
-                setUseCookies={props.setUseCookies} />
+                setUseCookies={props.setUseCookies}
+                formatInfo={formatInfo} />
             <SearchMenu
                 setClasses={props.setClasses}
                 anchorEl={searchAnchorEl}
-                setAnchorEl={setSearchAnchorEl} />
+                setAnchorEl={setSearchAnchorEl}
+                formatClasses={formatClasses} />
         </div>
     )
 })
