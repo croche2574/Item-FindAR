@@ -51,6 +51,7 @@ const InfoMenu = memo((props) => {
         "Vegan",
         "Vegetarian"
     ]
+    
     const toggleStatesDietary = [
         {
             stateName: 'Neutral',
@@ -71,9 +72,12 @@ const InfoMenu = memo((props) => {
     }, [])
 
     const closeHandler = useCallback(() => {
-        //Update allergen state
+        console.log('menustate ', menuState)
+        props.formatInfo(menuState)
         props.setAnchorEl(null)
-    }, [])
+    }, [menuState])
+
+    //const allergyDescription = <Typography></Typography>
 
     if (allergenLoading) {
         console.log("Loading")
@@ -84,7 +88,6 @@ const InfoMenu = memo((props) => {
                 key={'loadmessage'} />
         )
     } else if (allergenResults) {
-
         return (
             <Popover
                 id={infoID}
@@ -166,7 +169,7 @@ const SearchMenu = memo((props) => {
     }, [])
 
     const closeHandler = useCallback((e) => {
-        props.setClasses()
+        props.formatClasses(menuState)
         props.setAnchorEl(null)
     }, [menuState])
 
@@ -225,25 +228,46 @@ export const AppMenu = memo((props) => {
         alignItems: 'center',
         flexDirection: 'column',
     }
-    const dietMapping = {
-        Gluten: 'exists((item)-[:TAGGED_AS]-(:ItemTag {name: \'Gluten Free\'}))',
-        Kosher: 'exists((item)-[:TAGGED_AS]-(:ItemTag {name: \'Kosher\'}))',
-        Lactose: 'exists((item)-[:TAGGED_AS]-(:ItemTag {name: \'Lactose Free\'}))',
-        Vegan: 'exists((item)-[:TAGGED_AS]-(:ItemTag {name: \'Vegan\'}))',
-        Vegetarian: 'exists((item)-[:TAGGED_AS]-(:ItemTag {name: \'Vegetarian\'}))'
-    }
-
-    const [query, setQuery] = useState()
 
     const formatInfo = useCallback((state) => {
-        const allergens = state.allergens
-        const dietary = ""
-        
-        props.setUserInfo()
+        const allergens = Object.keys(state['Allergens']).reduce((newObj, key) => {
+            if (state['Allergens'][key] != 0) newObj[key] = state['Allergens'][key]
+            return newObj
+        }, {})
+        const dietary = Object.keys(state['Dietary Restrictions']).reduce((newObj, key) => {
+            if (state['Dietary Restrictions'][key] != 0) newObj[key] = state['Dietary Restrictions'][key]
+            return newObj
+        }, {})
+
+        props.setUserInfo({ allergens: { ...allergens }, restrictions: { ...dietary } })
     }, [])
 
-    const formatClasses = useCallback((state) => {
+    const formatClassQuery = useCallback((state) => {
+        const formattedData = Object.keys(state).reduce((newObj, key) => {
+            const section = state[key]
+            Object.keys(section).forEach((option) => {
+                if (key === 'Allergens') {
+                    if (section[option] === 1) newObj['allowed'].push(option)
+                    if (section[option] === 2) newObj['denied'].push(option)
+                } else {
+                    if (section[option] === 0) newObj['allowed'].push(option)
+                    if (section[option] === 1) newObj['denied'].push(option)
+                }
+            })
+            return newObj
+        }, { allowed: [], denied: [] })
 
+        const allowed = formattedData.allowed.map(i => `'${i}'`).join(',')
+        const denied = formattedData.denied.map(i => `'${i}'`).join(',')
+        const op = (formattedData.allowed.length === 0 || formattedData.denied.length === 0) ? 'OR' : 'AND'
+        props.setQuery(`
+        MATCH (item:Item)-[:CONTAINS_ALLERGEN | CONTAINS_INGREDIENT | TAGGED_AS] -> (n)
+        WHERE n.name IN [${allowed}] ${op} NOT n.name IN [${denied}]
+        RETURN item.class_code AS class_codes
+        UNION
+        MATCH (item2:Item)-[:CONTAINS_INGREDIENT]->()-[:CONTAINS_SUBINGREDIENT]->(ing:Ingredient)
+        WHERE ing.name IN [${allowed}] ${op} NOT ing.name IN [${denied}]
+        RETURN item2.class_code AS class_codes`)
     }, [])
 
     return (
@@ -261,10 +285,9 @@ export const AppMenu = memo((props) => {
                 setUseCookies={props.setUseCookies}
                 formatInfo={formatInfo} />
             <SearchMenu
-                setClasses={props.setClasses}
                 anchorEl={searchAnchorEl}
                 setAnchorEl={setSearchAnchorEl}
-                formatClasses={formatClasses} />
+                formatClasses={formatClassQuery} />
         </div>
     )
 })

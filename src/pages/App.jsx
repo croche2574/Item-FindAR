@@ -5,6 +5,7 @@ import { XR, ARButton } from '@react-three/xr'
 import { Canvas } from '@react-three/fiber'
 import './App.css'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
+import { useReadCypher } from 'use-neo4j'
 
 const theme = createTheme()
 
@@ -19,21 +20,33 @@ const ThemedAppMenu = memo((props) => {
 export const App = memo((props) => {
   const [searchClasses, setSearchClasses] = useState([])
   const [userInfo, setUserInfo] = useState({})
+  const [query, setQuery] = useState('MATCH (n:Node) RETURN n')
   const [isPresenting, setPresenting] = useState(false)
+  const { records: classResults, run: runQuery } = useReadCypher(query)
 
   useEffect(() => {
     console.log('User settings: ', userInfo)
   }, [userInfo])
 
   useEffect(() => {
-    console.log('Classes set: ', searchClasses)
+    console.log('Query set: ', query)
+    runQuery({ query })
+  }, [query])
+
+  useEffect(() => {
+    console.log('class results', classResults)
+    if (classResults) { setSearchClasses(classResults.map(row => row.get('class_codes'))) }
+  }, [classResults])
+
+  useEffect(() => {
+    console.log('Search classes: ', searchClasses)
   }, [searchClasses])
 
   //console.log(isPresenting)
   return (
     <>
       {isPresenting ?
-        <ThemedAppMenu setClasses={setSearchClasses} setUserInfo={setUserInfo} /> :
+        <ThemedAppMenu setQuery={setQuery} setUserInfo={setUserInfo} /> :
         <ARButton
           enterOnly={true}
           sessionInit={{
