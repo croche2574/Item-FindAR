@@ -51,7 +51,7 @@ const InfoMenu = memo((props) => {
         "Vegan",
         "Vegetarian"
     ]
-    
+
     const toggleStatesDietary = [
         {
             stateName: 'Neutral',
@@ -259,15 +259,16 @@ export const AppMenu = memo((props) => {
 
         const allowed = formattedData.allowed.map(i => `'${i}'`).join(',')
         const denied = formattedData.denied.map(i => `'${i}'`).join(',')
-        const op = (formattedData.allowed.length === 0 || formattedData.denied.length === 0) ? 'OR' : 'AND'
+        let op = ""
+        if (allowed.length !== 0 && denied.length !== 0) { op = 'AND NONE' }
+        else if (denied.length === 0) { op = 'OR' }
+        else if (allowed.length === 0) { op = 'OR NONE' }
         props.setQuery(`
-        MATCH (item:Item)-[:CONTAINS_ALLERGEN | CONTAINS_INGREDIENT | TAGGED_AS] -> (n)
-        WHERE n.name IN [${allowed}] ${op} NOT n.name IN [${denied}]
-        RETURN item.class_code AS class_codes
-        UNION
-        MATCH (item2:Item)-[:CONTAINS_INGREDIENT]->()-[:CONTAINS_SUBINGREDIENT]->(ing:Ingredient)
-        WHERE ing.name IN [${allowed}] ${op} NOT ing.name IN [${denied}]
-        RETURN item2.class_code AS class_codes`)
+        MATCH (a:Allergen|Ingredient|ItemTag WHERE a.name IN [${allowed}]) WHERE NOT ()-[:CONTAINS_SUBINGREDIENT]-(a)
+        MATCH (d:Allergen|Ingredient|ItemTag WHERE d.name IN [${denied}]) WHERE NOT ()-[:CONTAINS_SUBINGREDIENT]-(d)
+        WITH collect(a) AS allowed, collect(d) AS denied
+        MATCH (items:Item) WHERE ALL(a IN allowed WHERE (items)--(a)) ${op}(d IN denied WHERE (items)--(d))
+        RETURN items.class_code AS class_codes`)
     }, [])
 
     return (
@@ -278,6 +279,7 @@ export const AppMenu = memo((props) => {
                 infoHandler={(event) => setInfoAnchorEl(anchorRef.current)}
                 searchHandler={(event) => setSearchAnchorEl(anchorRef.current)}
                 closeHandler={(event) => toggleSession('immersive-ar')}
+                setSearchMode={props.setSearchMode}
             />
             <InfoMenu
                 anchorEl={infoAnchorEl}

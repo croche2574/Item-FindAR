@@ -23,6 +23,7 @@ export const App = memo((props) => {
   const [query, setQuery] = useState('MATCH (n:Node) RETURN n')
   const [isPresenting, setPresenting] = useState(false)
   const { records: classResults, run: runQuery } = useReadCypher(query)
+  const [searchMode, setSearchMode] = useState(false)
 
   useEffect(() => {
     console.log('User settings: ', userInfo)
@@ -42,11 +43,15 @@ export const App = memo((props) => {
     console.log('Search classes: ', searchClasses)
   }, [searchClasses])
 
+  useEffect(() => {
+    if (!searchMode) { setSearchClasses([]) }
+  }, [searchMode])
+
   //console.log(isPresenting)
   return (
     <>
       {isPresenting ?
-        <ThemedAppMenu setQuery={setQuery} setUserInfo={setUserInfo} /> :
+        <ThemedAppMenu setQuery={setQuery} setUserInfo={setUserInfo} setSearchMode={setSearchMode} /> :
         <ARButton
           enterOnly={true}
           sessionInit={{
@@ -55,7 +60,7 @@ export const App = memo((props) => {
           }} />}
       <Canvas>
         <XR referenceSpace="local">
-          <AugmentSystem classes={searchClasses} settings={userInfo} setPresenting={setPresenting} />
+          <AugmentSystem classes={searchClasses} settings={userInfo} setPresenting={setPresenting} searchMode={searchMode} />
           <ambientLight />
           <pointLight position={[10, 10, 10]} />
         </XR>

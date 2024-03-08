@@ -1,4 +1,4 @@
-import {Image} from 'imagescript'
+import { Image } from 'imagescript'
 
 class WebSocketClient {
     #reconnectInterval
@@ -12,17 +12,17 @@ class WebSocketClient {
         this.openSocket = false
     }
 
-    onopen = (e) => {this.openSocket = true}
-    onclose = (e) => {this.openSocket = false}
-    onmessage = (e) => {console.log(e)}
-    onerror = (e) => {console.log(e)}
+    onopen = (e) => { this.openSocket = true }
+    onclose = (e) => { this.openSocket = false }
+    onmessage = (e) => { console.log(e) }
+    onerror = (e) => { console.log(e) }
 
     open = () => {
         var that = this
         this.instance = new WebSocket(this.url)
-        
+
         this.instance.onopen = (ev) => {
-            if (that.reconnected && that.debug) {
+            if (that.#reconnected && that.debug) {
                 console.log('[WS]: Reconnected.')
             }
             self.postMessage("Open")
@@ -50,15 +50,15 @@ class WebSocketClient {
         }
 
         this.instance.onerror = (error) => {
-            switch(error.code) {
+            switch (error.code) {
                 // Try and reconnect
                 case 'ECONNREFUSED':
-                    that.reconnect(e);
+                    that.reconnect();
                     break;
 
                 // Otherwise run error
                 default:
-                    that.onerror(e);
+                    that.onerror(error.code);
                     break;
             }
         }
@@ -85,12 +85,12 @@ class WebSocketClient {
             }
         }, 5, [content])
     }
-    
+
     send = (content) => {
         //console.log(`send: ${content}`)
         this.waitForOpen(content)
     }
-    
+
     reconnect = (e) => {
         var that = this
 
@@ -105,7 +105,7 @@ class WebSocketClient {
             }
 
             // Define has reconnected
-            that.reconnected = true;
+            that.#reconnected = true;
 
             // Try and open the URL
             that.open(that.url);
@@ -160,6 +160,14 @@ export class sendImg {
         image.contain(640, 640)
         client.send(image.bitmap)
     }
+
+    sendClasses(class_list) {
+        const message = JSON.stringify({
+            classes: class_list
+        })
+        console.log("message", message)
+        client.send(message)
+    }
 }
 
 const imageSender = new sendImg()
@@ -175,6 +183,9 @@ self.onmessage = (msg) => {
             break
         case "send":
             imageSender.send(new Uint8Array(m.data.buff))
+            break
+        case "classes":
+            imageSender.sendClasses(m.data.classes)
             break
     }
 }
