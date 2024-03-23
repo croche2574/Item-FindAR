@@ -23,7 +23,9 @@ export const AugmentSystem = memo((props) => {
                     detectedItems={detectedItems}
                     setDetectedItems={setDetectedItems}
                     imageShape={imageShape}
-                    enabled={isPresenting} />
+                    enabled={isPresenting}
+                    settings={props.settings}
+                    searchMode={props.searchMode} />
                 <ItemDetector
                     detectedItems={detectedItems}
                     setDetectedItems={setDetectedItems}

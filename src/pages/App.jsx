@@ -20,8 +20,8 @@ const ThemedAppMenu = memo((props) => {
 export const App = memo((props) => {
   const [searchClasses, setSearchClasses] = useState([])
   const [userInfo, setUserInfo] = useState({})
-  const [query, setQuery] = useState('MATCH (n:Node) RETURN n')
   const [isPresenting, setPresenting] = useState(false)
+  const [query, setQuery] = useState('MATCH (n:Node) RETURN n')
   const { records: classResults, run: runQuery } = useReadCypher(query)
   const [searchMode, setSearchMode] = useState(false)
 

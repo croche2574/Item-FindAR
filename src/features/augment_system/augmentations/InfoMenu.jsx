@@ -134,7 +134,7 @@ const ItemViewBlock = () => {
 }
 const IngredientText = (props) => {
   return (
-      <block
+    <block
       args={[
         {
           width: 0.55,
@@ -168,9 +168,9 @@ const IngredientBlock = (props) => {
           fontTexture: props.FontImage,
         }
       ]}>
-      
-        <IngredientText data={props.data}/>
-      
+
+      <IngredientText data={props.data} />
+
     </block>
   )
 }
@@ -191,13 +191,8 @@ const TagBlock = (props) => {
         }
       ]}>
       <text fontSize={0.045} content={`${props.title}:\n`} />
-      {props.values.map((val) => {
-        if (props.title === 'Allergens') {
-          console.log(val)
-          return <text fontSize={0.045} content={`| ${val.name} |`} key={val.name + new Date().getTime()} />
-        } else if (props.title === 'Tags') {
-          return <text fontSize={0.045} content={`| ${val} |`} key={val + new Date().getTime()} />
-        }
+      {Object.keys(props.values).map((val) => {
+        return <text fontSize={0.045} content={`| ${val} |`} key={val + new Date().getTime()} />
       })}
     </block>
   )
@@ -227,7 +222,7 @@ const InfoBlock = (props) => {
 
 export const InfoMenu = (props) => {
   const itemData = props.data
-  
+
   console.log("menu pos", props.position)
 
   useEffect(() => {
@@ -243,7 +238,7 @@ export const InfoMenu = (props) => {
     //console.log("update loop font", props.menuRef.current.fontFamily)
     try {
       ThreeMeshUI.update()
-      
+
     } catch (error) {
       console.log(error)
     }

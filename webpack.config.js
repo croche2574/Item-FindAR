@@ -28,13 +28,23 @@ module.exports = {
         ]
       },
       {
-        test: /\.(png|jpe?g|gif|glb)$/i,
-        use: [
-          {
-            loader: "url-loader",
-          },
-        ],
+        test: /\.(ttf|eot|woff|woff2)$/,
+        type: 'asset',
+        generator: {
+          filename: 'fonts/[hash][ext][query]'
+        }
+       },
+      {
+        test: /\.(png|jpe?g|gif|svg)$/i,
+        type: 'asset/inline'
       },
+      {
+        test: /\.(glb|gltf)$/,
+        type: 'asset/resource',
+        generator: {
+          filename: 'models/[hash][ext][query]'
+        }
+       },
     ]
   },
   resolve: {

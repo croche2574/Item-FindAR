@@ -65,6 +65,8 @@ const InfoMenu = memo((props) => {
         }
     ]
 
+    //const allergenDescription = "Tap the options below to change between Neutral, Mild, or Severe.\n"
+
     const clearHandler = useCallback((e) => {
         allergenSettingsRef.current.clearChipStates()
         dietaryRestrictionsRef.current.clearChipStates()
@@ -76,8 +78,6 @@ const InfoMenu = memo((props) => {
         props.formatInfo(menuState)
         props.setAnchorEl(null)
     }, [menuState])
-
-    //const allergyDescription = <Typography></Typography>
 
     if (allergenLoading) {
         console.log("Loading")
@@ -172,8 +172,6 @@ const SearchMenu = memo((props) => {
         props.formatClasses(menuState)
         props.setAnchorEl(null)
     }, [menuState])
-
-
 
     if (ingredientLoading || allergenLoading || itemTagLoading || itemLoading) {
         console.log("Loading")

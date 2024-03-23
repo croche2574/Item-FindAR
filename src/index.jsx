@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const driver = createDriver('bolt', '192.168.50.16', 7687, 'neo4j', 'Rc349603')
     root.render(
         <React.StrictMode>
-            <Neo4jProvider driver={driver} database="neo4j">
+            <Neo4jProvider driver={driver} database="labset">
                 <App />
             </Neo4jProvider>
         </React.StrictMode>
