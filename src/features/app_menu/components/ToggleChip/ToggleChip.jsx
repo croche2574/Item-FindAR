@@ -1,4 +1,4 @@
-import React from "react"
+import React, { memo } from "react"
 import Chip from '@mui/material/Chip'
 import './ToggleChip.css'
 
@@ -18,4 +18,4 @@ const ToggleChip = (props) => {
     )
 }
 
-export default React.memo(ToggleChip)
+export default memo(ToggleChip)

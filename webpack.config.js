@@ -3,11 +3,18 @@ const path = require('path')
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const TerserWebpackPlugin = require("terser-webpack-plugin");
+const WebpackPwaManifest = require('webpack-pwa-manifest')
+const { GenerateSW } = require("workbox-webpack-plugin");
 const fs = require('fs');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+
+const genRanHex = (size = 24) => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
 
 module.exports = {
   mode: 'development',
-  entry: './src/index.jsx',
+  entry: {
+    'app': './src/index.jsx',
+  },
   module: {
     rules: [
       {
@@ -33,7 +40,7 @@ module.exports = {
         generator: {
           filename: 'fonts/[hash][ext][query]'
         }
-       },
+      },
       {
         test: /\.(png|jpe?g|gif|svg)$/i,
         type: 'asset/inline'
@@ -44,7 +51,7 @@ module.exports = {
         generator: {
           filename: 'models/[hash][ext][query]'
         }
-       },
+      },
     ]
   },
   resolve: {
@@ -61,17 +68,66 @@ module.exports = {
       template: './src/index.html',
       inject: 'body'
     }),
+    new WebpackPwaManifest({
+      name: 'Item FindAR',
+      short_name: 'FindAR',
+      description: 'An App for finding and identifying food products while shopping',
+      background_color: '#848484',
+      theme_color: '#1976d2',
+      orientation: 'portrait',
+      icons: [
+        {
+          src: path.resolve('src/assets/icon.png'),
+          sizes: [384, 512], // multiple sizes
+          destination: path.join('icons', 'android'),
+        },
+        {
+          src: path.resolve('src/assets/large-icon.png'),
+          size: '1024x1024', // you can also use the specifications pattern
+          destination: path.join('icons', 'android'),
+        },
+        {
+          src: path.resolve('src/assets/maskable-icon.png'),
+          size: '1024x1024',
+          purpose: 'maskable',
+          destination: path.join('icons', 'android'),
+        }
+      ]
+    }),
+    new GenerateSW({
+      swDest: "sw.js",
+      maximumFileSizeToCacheInBytes: 10000000,
+      additionalManifestEntries: [
+        {
+          "url": "/offline",
+          "revision": genRanHex()
+        }
+      ],
+      runtimeCaching: [
+        {
+          urlPattern: /^https:\/\/([\w+\.\-]+www\.itemfindar\.net)(|\/.*)$/,
+          handler: 'StaleWhileRevalidate',
+          options: {
+            cacheName: 'core',
+            precacheFallback: {
+              fallbackURL: '/offline' // THIS IS THE KEY
+            }
+          }
+        }
+      ]
+    }),
     new CopyWebpackPlugin({
       patterns: [{ from: "./assets/models", to: "./assets/models", noErrorOnMissing: true }]
     }),
+    new BundleAnalyzerPlugin(),
   ],
   output: {
-    filename: "bundle.js",
+    filename: "[name].js",
     path: path.resolve(__dirname, "./dist"),
     clean: true,
   },
   devServer: {
-    allowedHosts: 'all',
+    allowedHosts: 'any',
     open: false,
     port: 8080,
     client: {
@@ -105,3 +161,9 @@ module.exports = {
     ],
   },
 };
+
+/**
+alias: {
+      three$: path.resolve("./build/three-exports.js"),
+    },
+*/

@@ -1,4 +1,4 @@
-import React, { forwardRef, useImperativeHandle, useEffect, useCallback } from "react";
+import React, { forwardRef, useImperativeHandle, useEffect, useCallback, memo } from "react";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -62,4 +62,4 @@ const BasicSection = forwardRef((props, _ref) => {
     )
 })
 
-export default React.memo(BasicSection)
+export default memo(BasicSection)

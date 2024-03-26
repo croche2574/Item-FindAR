@@ -258,15 +258,20 @@ export const AppMenu = memo((props) => {
         const allowed = formattedData.allowed.map(i => `'${i}'`).join(',')
         const denied = formattedData.denied.map(i => `'${i}'`).join(',')
         let op = ""
-        if (allowed.length !== 0 && denied.length !== 0) { op = 'AND NONE' }
-        else if (denied.length === 0) { op = 'OR' }
-        else if (allowed.length === 0) { op = 'OR NONE' }
-        props.setQuery(`
-        MATCH (a:Allergen|Ingredient|ItemTag WHERE a.name IN [${allowed}]) WHERE NOT ()-[:CONTAINS_SUBINGREDIENT]-(a)
-        MATCH (d:Allergen|Ingredient|ItemTag WHERE d.name IN [${denied}]) WHERE NOT ()-[:CONTAINS_SUBINGREDIENT]-(d)
-        WITH collect(a) AS allowed, collect(d) AS denied
-        MATCH (items:Item) WHERE ALL(a IN allowed WHERE (items)--(a)) ${op}(d IN denied WHERE (items)--(d))
-        RETURN items.class_code AS class_codes`)
+        if (allowed.length === 0 && denied.length === 0) {
+            props.setQuery(`
+                Match (i:Item) where i.name = 'none'
+                WITH collect(i.class_code) as codes
+                Return codes'`)
+        } else {
+            props.setQuery(`
+                OPTIONAL MATCH (a:Allergen|Ingredient|ItemTag WHERE a.name IN [${allowed}])
+                OPTIONAL MATCH (d:Allergen|Ingredient|ItemTag WHERE d.name IN [${denied}])
+                WITH collect(a) AS allowed, collect(d) as denied
+                MATCH (items:Item) WHERE ALL(a IN allowed WHERE (items)--(a) OR (items)--()-[:CONTAINS_SUBINGREDIENT]->(a)) 
+                MATCH (items:Item) WHERE NONE(d IN denied WHERE (items)--(d) OR (items)--()-[:CONTAINS_SUBINGREDIENT]->(d))
+                RETURN items.class_code AS class_codes`)
+        }
     }, [])
 
     return (

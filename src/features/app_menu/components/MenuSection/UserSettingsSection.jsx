@@ -21,8 +21,7 @@ export const UserSettingsSection = memo((props) => {
             <AccordionDetails>
                     <FormGroup>
                         <FormControlLabel control={<Switch onChange={handleCookieSwitch} checked={props.cookieState}/>} label={"Save User Settings"}/>
-                        <FormControlLabel control={<Switch disabled={true}/>} label={"Add to your Home Screen."}/>
-                        <FormHelperText>Creates necessary cookies or workers for optional features.</FormHelperText>
+                        <FormHelperText>Creates necessary cookies to save allergen and dietary restrictions.</FormHelperText>
                     </FormGroup>
             </AccordionDetails>
         </Accordion>

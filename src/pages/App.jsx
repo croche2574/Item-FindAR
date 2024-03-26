@@ -4,16 +4,46 @@ import React, { memo, useEffect, useState } from 'react'
 import { XR, ARButton } from '@react-three/xr'
 import { Canvas } from '@react-three/fiber'
 import './App.css'
-import { ThemeProvider, createTheme } from '@mui/material/styles'
+import { AppBar, Toolbar, Typography, Box, Card, CardContent, Stack, Button, Divider } from '@mui/material'
 import { useReadCypher } from 'use-neo4j'
 
-const theme = createTheme()
+const LandingPage = memo((props) => {
 
-const ThemedAppMenu = memo((props) => {
   return (
-    <ThemeProvider theme={theme} >
-      <AppMenu {...props} />
-    </ThemeProvider>
+    <Box style={{ zIndex: 99999 }}>
+      <AppBar style={{ position: 'fixed', top: 0 }}>
+        <Toolbar>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            Item FindAR
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      <Stack spacing={1} style={{ position: 'fixed', top: 50 }}>
+        <Card >
+          <CardContent>
+            <Typography variant="h5" gutterBottom>Overview</Typography>
+            <Typography variant='body2'>This application was designed to help users identify and view nutrition facts for items without needing to pick them up. Please try out the different features and complete the surveys below.</Typography>
+          </CardContent>
+        </Card>
+        <Card >
+          <CardContent>
+            <Typography variant="h5" gutterBottom>User Surveys</Typography>
+            <Stack spacing={2}>
+              <Button href='https://forms.gle/6NaPm4hxKWHc4RcA6' variant="contained">Pre-Survey</Button>
+              <Divider variant="middle" />
+              <Button href='https://nasa-tlx.firebaseapp.com/tlx' variant="contained">Task Load Index</Button>
+              <Button href='https://forms.gle/u29eRVhVwG47LjqV8' variant="contained">Post-Survey</Button>
+            </Stack>
+          </CardContent>
+        </Card>
+      </Stack>
+      <ARButton
+        enterOnly={true}
+        sessionInit={{
+          requiredFeatures: ['camera-access', 'hit-test', 'anchors', 'dom-overlay'],
+          domOverlay: typeof document !== 'undefined' ? { root: document.body } : undefined
+        }} />
+    </Box>
   )
 })
 
@@ -21,7 +51,7 @@ export const App = memo((props) => {
   const [searchClasses, setSearchClasses] = useState([])
   const [userInfo, setUserInfo] = useState({})
   const [isPresenting, setPresenting] = useState(false)
-  const [query, setQuery] = useState('MATCH (n:Node) RETURN n')
+  const [query, setQuery] = useState('MATCH (n:Item) RETURN n.class_code AS class_codes')
   const { records: classResults, run: runQuery } = useReadCypher(query)
   const [searchMode, setSearchMode] = useState(false)
 
@@ -37,6 +67,7 @@ export const App = memo((props) => {
   useEffect(() => {
     console.log('class results', classResults)
     if (classResults) { setSearchClasses(classResults.map(row => row.get('class_codes'))) }
+    else {setSearchClasses([])}
   }, [classResults])
 
   useEffect(() => {
@@ -44,21 +75,18 @@ export const App = memo((props) => {
   }, [searchClasses])
 
   useEffect(() => {
-    if (!searchMode) { setSearchClasses([]) }
+    console.log('search mode: ', searchMode)
+    if (searchMode) { setQuery(`MATCH (i:Item) WHERE i.name = 'none' WITH collect(i.class_code) AS class_codes RETURN class_codes'`) }
+    else { setQuery('MATCH (n:Item) RETURN n.class_code AS class_codes') }
   }, [searchMode])
 
   //console.log(isPresenting)
   return (
     <>
       {isPresenting ?
-        <ThemedAppMenu setQuery={setQuery} setUserInfo={setUserInfo} setSearchMode={setSearchMode} /> :
-        <ARButton
-          enterOnly={true}
-          sessionInit={{
-            requiredFeatures: ['camera-access', 'hit-test', 'anchors', 'dom-overlay'],
-            domOverlay: typeof document !== 'undefined' ? { root: document.body } : undefined
-          }} />}
-      <Canvas>
+        <AppMenu setQuery={setQuery} setUserInfo={setUserInfo} setSearchMode={setSearchMode} /> :
+        <LandingPage />}
+      <Canvas style={{ zIndex: -1 }}>
         <XR referenceSpace="local">
           <AugmentSystem classes={searchClasses} settings={userInfo} setPresenting={setPresenting} searchMode={searchMode} />
           <ambientLight />

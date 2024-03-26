@@ -35,8 +35,11 @@
     "terser-webpack-plugin": "^5.3.9",
     "url-loader": "^4.1.1",
     "webpack": "^5.88.2",
+    "webpack-bundle-analyzer": "^4.10.1",
     "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^4.15.1"
+    "webpack-dev-server": "^4.15.1",
+    "webpack-pwa-manifest": "^4.3.0",
+    "workbox-webpack-plugin": "^7.0.0"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
@@ -44,25 +47,18 @@
     "@fontsource/roboto": "^5.0.8",
     "@mui/icons-material": "^5.14.14",
     "@mui/material": "^5.14.14",
-    "@react-three/drei": "^9.81.0",
+    "@react-three/drei": "^9.88.3",
     "@react-three/fiber": "^8.14.0",
     "@react-three/xr": "^5.7.1",
-    "cbor-web": "^9.0.1",
-    "classnames": "^2.3.2",
-    "cookie": "^0.5.0",
     "imagescript": "github:matmen/ImageScript#browser",
     "js-cookie": "^3.0.5",
-    "konva": "^9.2.2",
-    "lodash": "^4.17.21",
     "material-ui-popup-state": "^5.0.9",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-konva": "^18.2.10",
     "react-slick": "^0.30.1",
     "slick-carousel": "^1.8.1",
     "three": "^0.155.0",
     "three-mesh-ui": "^6.5.4",
-    "tunnel-rat": "^0.1.2",
     "use-neo4j": "^0.3.13"
   }
 }

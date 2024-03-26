@@ -1,11 +1,6 @@
-import React, { useEffect, useState, useRef } from 'react'
-import ReactDOM from 'react-dom'
-import { Canvas, extend, useFrame, useThree } from '@react-three/fiber'
-import { Interactive } from '@react-three/xr'
+import React, { useEffect } from 'react'
+import { extend, useFrame, useThree } from '@react-three/fiber'
 import ThreeMeshUI from 'three-mesh-ui'
-import { OrbitControls, DragControls } from '@react-three/drei'
-import * as THREE from 'three'
-
 
 //import './styles.css'
 
@@ -67,27 +62,27 @@ const NutritionBlock = (props) => {
         }
       />
       <text
-        content={padCol(`Sat. Fat: ${props.data.nutrients['Saturated Fat'].amount}g`, `${props.data.nutrients['Saturated Fat'].percentage * 100}%`, 26) + '\n'}
+        content={padCol(`Sat. Fat: ${props.data.nutrients['Saturated Fat'].amount}g`, `${Math.floor(props.data.nutrients['Saturated Fat'].percentage * 100)}%`, 26) + '\n'}
       />
       <text
         content={
-          padCol(`Cholesterol: ${props.data.nutrients['Cholesterol'].amount}g`, `${props.data.nutrients['Cholesterol'].percentage * 100}%`, 24) +
+          padCol(`Cholesterol: ${props.data.nutrients['Cholesterol'].amount}g`, `${Math.floor(props.data.nutrients['Cholesterol'].percentage * 100)}%`, 24) +
           '\n'
         }
       />
       <text
         content={
-          padCol(`Sodium: ${props.data.nutrients['Sodium'].amount}mg`, `${props.data.nutrients['Sodium'].percentage * 100}%`, 23) + '\n'
+          padCol(`Sodium: ${props.data.nutrients['Sodium'].amount}mg`, `${Math.floor(props.data.nutrients['Sodium'].percentage * 100)}%`, 23) + '\n'
         }
       />
 
       <text
         content={
-          padCol(`Total Carbs: ${props.data.nutrients['Total Carbohydrate'].amount}g`, `${props.data.nutrients['Total Carbohydrate'].percentage * 100}%`, 24) + '\n'
+          padCol(`Total Carbs: ${props.data.nutrients['Total Carbohydrate'].amount}g`, `${Math.floor(props.data.nutrients['Total Carbohydrate'].percentage * 100)}%`, 24) + '\n'
         }
       />
       <text
-        content={padCol(`  Dietary Fiber: ${props.data.nutrients['Dietary Fiber'].amount}g`, `${props.data.nutrients['Dietary Fiber'].percentage * 100}%\n`, 26)}
+        content={padCol(`  Dietary Fiber: ${props.data.nutrients['Dietary Fiber'].amount}g`, `${Math.floor(props.data.nutrients['Dietary Fiber'].percentage * 100)}%\n`, 26)}
       />
       <text content={`  Total Sugar: ${props.data.nutrients['Total Sugars'].amount}g\n`} />
       <text
@@ -101,16 +96,16 @@ const NutritionBlock = (props) => {
       <text fontSize={0.045} content={`-------------------------\n`} />
       <text
         content={
-          padCol(`Vit. D:`, `${props.data.nutrients['Vitamin D'].percent * 100}%`, 10) +
+          padCol(`Vit. D:`, `${Math.floor(props.data.nutrients['Vitamin D'].percent * 100)}%`, 10) +
           ' | ' +
-          padCol(`Calcium:`, `${props.data.nutrients['Calcium'].percent * 100}%`, 12) + '\n'
+          padCol(`Calcium:`, `${Math.floor(props.data.nutrients['Calcium'].percent * 100)}%`, 12) + '\n'
         }
       />
       <text
         content={
-          padCol(`Iron:`, `${props.data.nutrients['Iron'].percent * 100}%`, 10) +
+          padCol(`Iron:`, `${Math.floor(props.data.nutrients['Iron'].percent * 100)}%`, 10) +
           ' | ' +
-          padCol(`Pot.:`, `${props.data.nutrients['Potassium'].percent * 100}%`, 15) +
+          padCol(`Pot.:`, `${Math.floor(props.data.nutrients['Potassium'].percent * 100)}%`, 15) +
           '\n'
         }
       />
@@ -191,6 +186,29 @@ const TagBlock = (props) => {
         }
       ]}>
       <text fontSize={0.045} content={`${props.title}:\n`} />
+      {props.values.map((val) => {
+        return <text fontSize={0.045} content={`| ${val} |`} key={val + new Date().getTime()} />
+      })}
+    </block>
+  )
+}
+
+const AllergenBlock = (props) => {
+  return (
+    <block
+      args={[
+        {
+          width: 0.7,
+          height: 0.25,
+          fontSize: 0.015,
+          interLine: 0.0004,
+          padding: 0.015,
+          margin: 0.015,
+          backgroundOpacity: 0.5,
+          alignItems: 'start'
+        }
+      ]}>
+      <text fontSize={0.045} content={`${props.title}:\n`} />
       {Object.keys(props.values).map((val) => {
         return <text fontSize={0.045} content={`| ${val} |`} key={val + new Date().getTime()} />
       })}
@@ -199,6 +217,7 @@ const TagBlock = (props) => {
 }
 
 const InfoBlock = (props) => {
+  console.log(props.data)
   return (
     <block
       args={[
@@ -214,7 +233,7 @@ const InfoBlock = (props) => {
           contentDirection: 'row'
         }
       ]}>
-      <TagBlock title="Allergens" values={props.data.allergens} />
+      <AllergenBlock title="Allergens" values={props.data.allergens} />
       <TagBlock title="Tags" values={props.data.tags} />
     </block>
   )
@@ -227,9 +246,8 @@ export const InfoMenu = (props) => {
 
   useEffect(() => {
     if (props.menuVis) {
-      props.menuRef.current.rotation.x = -.55
       props.menuRef.current.update(true, true, true)
-      console.log("Menu:", props.menuRef.current)
+      //console.log("Menu:", props.menuRef.current)
     }
   }, [props.menuVis])
 
@@ -247,6 +265,7 @@ export const InfoMenu = (props) => {
     <block
       position={props.position.clone()}
       scale={(0.4, 0.4, 0.4)}
+      quaternion={props.quaternion}
       ref={props.menuRef}
       args={[
         {

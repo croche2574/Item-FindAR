@@ -8,6 +8,7 @@ export const AnchorSystem = memo((props) => {
     const { gl } = useThree()
     const detectedItems = props.detectedItems
     const [isDirty, setDirty] = useState(false)
+    const [markerOpaque, setMarkerOpaque] = useState(true)
 
     //const query = 'match (n) return n'
     const { loading: loading, result: results, first: first, run: run } = useReadCypher('MATCH (n:Item)-[r]-(c) WHERE n.class_code IN $clsnames RETURN n, r, c', { clsnames: [] })
@@ -135,7 +136,7 @@ export const AnchorSystem = memo((props) => {
                         console.log("No ItemData")
                         return
                     } else {
-                        return <ItemMarker key={item.id} id={item.id} searchMode={props.searchMode} itemData={item.itemData} settings={props.settings} position={item.anchorData.object.position} scale={item.anchorData.object.scale} quaternion={item.anchorData.object.quaternion} />
+                        return <ItemMarker key={item.id} id={item.id} markerOpaque={markerOpaque} setMarkerOpaque={setMarkerOpaque} searchMode={props.searchMode} itemData={item.itemData} settings={props.settings} position={item.anchorData.object.position} scale={item.anchorData.object.scale} quaternion={item.anchorData.object.quaternion} />
                     }
                 })}
             </group>

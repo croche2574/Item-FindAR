@@ -1,13 +1,13 @@
 import { useEffect, useMemo } from 'react'
 import { useThree, useFrame } from '@react-three/fiber'
 import { useXR } from '@react-three/xr'
-import * as THREE from 'three';
+import { Matrix4, Vector3, Quaternion } from 'three';
 
 export const useHitTest = (callback, objects, setObjects) => {
     const session = useXR((state) => state.session)
     const { gl } = useThree()
     const refspace = gl.xr.getReferenceSpace()
-    let hitMatrix = useMemo(() => new THREE.Matrix4(), [])
+    let hitMatrix = useMemo(() => new Matrix4(), [])
 
     const transformOrigin = ([x, y]) => {
         return [x - 0.5, (y - 0.5) * -1]
@@ -26,7 +26,7 @@ export const useHitTest = (callback, objects, setObjects) => {
                 temp.push(obj)
             } else {
                 obsChanged = true
-                let c = transformOrigin([obj.x + (obj.w / 2), obj.y + (obj.h / 2) - .2]);
+                let c = transformOrigin([obj.x + (obj.w / 2), obj.y + (obj.h / 2) - .3]);
 
                 console.log("center", c)
                 session.requestReferenceSpace('viewer').then((ref) => {
@@ -74,16 +74,16 @@ export const useHitTest = (callback, objects, setObjects) => {
                     obj.hit.createAnchor().then(
                         (anchor) => {
                             //console.log('anchor:', anchor)
-
+                            console.log(state)
                             //console.log("matrix", obj.hitMatrix)
                             obj.anchorData = {
                                 anchor: anchor,
                                 object: {
-                                    position: new THREE.Vector3().setFromMatrixPosition(obj.hitMatrix),
-                                    scale: new THREE.Vector3()
+                                    position: new Vector3().setFromMatrixPosition(obj.hitMatrix),
+                                    scale: new Vector3()
                                         .setFromMatrixScale(obj.hitMatrix)
-                                        .clamp(new THREE.Vector3(0.001, 0.001, 0.001), new THREE.Vector3(0.01, 0.01, 0.01)),
-                                    quaternion: new THREE.Quaternion().setFromRotationMatrix(obj.hitMatrix)
+                                        .clamp(new Vector3(0.001, 0.001, 0.001), new Vector3(0.004, 0.004, 0.004)),
+                                    quaternion: new Quaternion().copy(state.camera.quaternion)
                                 }
                             }
                             obj.hitsource.cancel()

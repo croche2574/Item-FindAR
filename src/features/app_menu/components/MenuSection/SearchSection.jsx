@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, memo } from "react";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -82,4 +82,4 @@ const SearchSection = (props) => {
     )
 }
 
-export default React.memo(SearchSection)
+export default memo(SearchSection)
