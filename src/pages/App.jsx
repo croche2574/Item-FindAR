@@ -31,7 +31,6 @@ const LandingPage = memo((props) => {
             <Stack spacing={2}>
               <Button href='https://forms.gle/6NaPm4hxKWHc4RcA6' variant="contained">Pre-Survey</Button>
               <Divider variant="middle" />
-              <Button href='https://nasa-tlx.firebaseapp.com/tlx' variant="contained">Task Load Index</Button>
               <Button href='https://forms.gle/u29eRVhVwG47LjqV8' variant="contained">Post-Survey</Button>
             </Stack>
           </CardContent>
@@ -39,6 +38,8 @@ const LandingPage = memo((props) => {
       </Stack>
       <ARButton
         enterOnly={true}
+        disabled={!navigator.onLine}
+        {...(!navigator.onLine ? {innerHTML: "Offline"} : {})}
         sessionInit={{
           requiredFeatures: ['camera-access', 'hit-test', 'anchors', 'dom-overlay'],
           domOverlay: typeof document !== 'undefined' ? { root: document.body } : undefined

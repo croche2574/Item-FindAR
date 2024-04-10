@@ -245,6 +245,7 @@ export const InfoMenu = (props) => {
   console.log("menu pos", props.position)
 
   useEffect(() => {
+    
     if (props.menuVis) {
       props.menuRef.current.update(true, true, true)
       //console.log("Menu:", props.menuRef.current)

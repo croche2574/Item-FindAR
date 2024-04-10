@@ -1,36 +1,19 @@
 import React, { useState, useCallback, useEffect, useRef, memo } from "react"
 import { InfoMenu } from '../augmentations/InfoMenu'
 import { Interactive } from '@react-three/xr'
-import { useGLTF } from "@react-three/drei"
+import { AlertModel, NeutralModel, SafeModel, WarnModel } from "../augmentations/models/models"
 
-const FontJSON = '../../../Roboto-msdf.json'
-const FontImage = '../../../Roboto-msdf.png'
-
-import alertPath from '../augmentations/models/alert.glb'
-import neutralPath from '../augmentations/models/neutral.glb'
-import safePath from '../augmentations/models/safe.glb'
-import warnPath from '../augmentations/models/warn.glb'
-
-useGLTF.preload('.' + alertPath.substring(alertPath.indexOf("/models")))
-useGLTF.preload('.' + neutralPath.substring(neutralPath.indexOf("/models")))
-useGLTF.preload('.' + safePath.substring(safePath.indexOf("/models")))
-useGLTF.preload('.' + warnPath.substring(warnPath.indexOf("/models")))
-
+import FontJSON from '../../../Roboto-msdf.json'
+import FontImage from '../../../Roboto-msdf.png'
 
 const MarkerModel = memo((props) => {
     const { mode, onMarkerSelect, markerOpaque, position, scale, quaternion } = props
-    const alertNode = useGLTF('.' + alertPath.substring(alertPath.indexOf("/models")))
-    const neutralNode = useGLTF('.' + neutralPath.substring(neutralPath.indexOf("/models")))
-    const safeNode = useGLTF('.' + safePath.substring(safePath.indexOf("/models")))
-    const warnNode = useGLTF('.' + warnPath.substring(warnPath.indexOf("/models")))
     const opacity = (markerOpaque) ? 1.0 : 0.5
-
-    console.log(neutralNode)
     const modelLookup = {
-        alert: <primitive castShadow receiveShadow object={alertNode.scene} position={position} scale={scale} quaternion={quaternion} children-0-material-transparent={true} children-0-material-opacity={opacity} />,
-        neutral: <primitive castShadow receiveShadow object={neutralNode.scene} position={position} scale={scale} quaternion={quaternion} children-0-material-transparent={true} children-0-material-opacity={opacity} />,
-        safe: <primitive castShadow receiveShadow object={safeNode.scene} position={position} scale={scale} quaternion={quaternion} children-0-material-transparent={true} children-0-material-opacity={opacity} />,
-        warn: <primitive castShadow receiveShadow object={warnNode.scene} position={position} scale={scale} quaternion={quaternion} children-0-material-transparent={true} children-0-material-opacity={opacity} />,
+        alert: <AlertModel position={position} scale={scale} quaternion={quaternion} opacity={opacity} />,
+        neutral: <NeutralModel position={position} scale={scale} quaternion={quaternion} opacity={opacity} />,
+        safe: <SafeModel position={position} scale={scale} quaternion={quaternion} opacity={opacity} />,
+        warn: <WarnModel position={position} scale={scale} quaternion={quaternion} opacity={opacity} />,
     }
     
     return (
@@ -80,7 +63,7 @@ export const ItemMarker = memo((props) => {
 
     return (
         <>
-            <MarkerModel mode={alertLevel} onMarkerSelect={onMarkerSelect} markerOpaque={markerOpaque} position={position} scale={scale} quaternion={quaternion} />
+            {((menuVis && !markerOpaque) || markerOpaque) && <MarkerModel mode={alertLevel} onMarkerSelect={onMarkerSelect} markerOpaque={markerOpaque} position={position} scale={scale} quaternion={quaternion} />}
             {menuVis && itemData && <InfoMenu menuRef={menuRef} data={itemData} menuVis={menuVis} setMenuVis={setMenuVis} position={position} quaternion={quaternion} scale={scale} FontJSON={FontJSON.valueOf()} FontImage={FontImage.valueOf()} />}
         </>
     )

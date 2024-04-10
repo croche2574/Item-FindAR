@@ -114,7 +114,7 @@ class WebSocketClient {
     }
 }
 
-var client = new WebSocketClient("wss://eac31e87c886.ngrok.app/detect")
+var client = new WebSocketClient("wss://d4b7af5e0098.ngrok.app/detect")
 
 client.onmessage = (e) => {
     console.log(e)
