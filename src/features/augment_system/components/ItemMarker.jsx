@@ -15,7 +15,7 @@ const MarkerModel = memo((props) => {
         safe: <SafeModel position={position} scale={scale} quaternion={quaternion} opacity={opacity} />,
         warn: <WarnModel position={position} scale={scale} quaternion={quaternion} opacity={opacity} />,
     }
-    
+
     return (
         <Interactive onSelect={onMarkerSelect}>
             {modelLookup[mode]}
@@ -44,17 +44,20 @@ export const ItemMarker = memo((props) => {
         console.log("item data", itemData)
     }, [menuVis, markerOpaque])
 
-    useEffect(() => () => {if (menuVis) { setMarkerOpaque(true); console.log("Object unloaded") }}, [menuVis])
+    useEffect(() => () => { if (menuVis) { setMarkerOpaque(true); console.log("Object unloaded") } }, [menuVis])
 
     useEffect(() => {
         const allergens = Object.keys(settings.allergens ?? {}).filter(setting => Object.keys(itemData.allergens).indexOf(setting) !== -1)
+        const dietary = Object.keys(settings.restrictions ?? {}).filter(setting => itemData.tags.indexOf(setting) !== -1)
+        console.log("dietary:", dietary)
         console.log(settings)
         console.log(itemData)
         console.log(allergens)
+        console.log(settings.restrictions)
 
-        if (allergens.length === 0) {
+        if (allergens.length === 0 && (dietary.length === settings.restrictions?.length || typeof(settings.restrictions) === 'undefined')) {
             (searchMode) ? setAlertLevel('safe') : setAlertLevel('neutral')
-        } else if (allergens.filter((allergen) => { return itemData.allergens[allergen].may === false && settings.allergens[allergen] != 2 }).length !== 0) {
+        } else if (allergens.filter((allergen) => { return itemData.allergens[allergen].may === false && settings.allergens[allergen] != 2 }).length !== 0 && dietary.length === settings.restrictions.length) {
             setAlertLevel('alert')
         } else {
             setAlertLevel('warn')

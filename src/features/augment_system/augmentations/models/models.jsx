@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { memo } from 'react'
 import { useGLTF } from '@react-three/drei'
 import { MeshBasicMaterial } from 'three'
 
@@ -7,11 +7,9 @@ import neutralPath from './neutral.glb'
 import safePath from './safe.glb'
 import warnPath from './warn.glb'
 
-
-
-export const AlertModel = (props) => {
+export const AlertModel = memo((props) => {
     const { nodes } = useGLTF(alertPath.substring(alertPath.indexOf("/models")))
-    const newMat = new MeshBasicMaterial({color: 0xff7800, opacity: props.opacity, transparent: true})
+    const newMat = new MeshBasicMaterial({ color: 0xff7800, opacity: props.opacity, transparent: true })
     return (
         <group {...props} dispose={null}>
             <mesh
@@ -22,11 +20,11 @@ export const AlertModel = (props) => {
             />
         </group>
     )
-}
+}, [])
 
-export const NeutralModel = (props) => {
+export const NeutralModel = memo((props) => {
     const { nodes } = useGLTF(neutralPath.substring(neutralPath.indexOf("/models")))
-    const newMat = new MeshBasicMaterial({color: 0x808080, opacity: props.opacity, transparent: true})
+    const newMat = new MeshBasicMaterial({ color: 0x808080, opacity: props.opacity, transparent: true })
     //console.log(neutralPath.substring(neutralPath.indexOf("/models")))
     return (
         <group {...props} dispose={null}>
@@ -38,11 +36,11 @@ export const NeutralModel = (props) => {
             />
         </group>
     )
-}
+}, [])
 
-export const SafeModel = (props) => {
+export const SafeModel = memo((props) => {
     const { nodes } = useGLTF(safePath.substring(safePath.indexOf("/models")))
-    const newMat = new MeshBasicMaterial({color: 0x32CD32, opacity: props.opacity, transparent: true})
+    const newMat = new MeshBasicMaterial({ color: 0x32CD32, opacity: props.opacity, transparent: true })
     return (
         <group {...props} dispose={null}>
             <mesh
@@ -53,11 +51,11 @@ export const SafeModel = (props) => {
             />
         </group>
     )
-}
+}, [])
 
-export const WarnModel = (props) => {
+export const WarnModel = memo((props) => {
     const { nodes } = useGLTF(warnPath.substring(warnPath.indexOf("/models")))
-    const newMat = new MeshBasicMaterial({color: 0xff0f0f, opacity: props.opacity, transparent: true})
+    const newMat = new MeshBasicMaterial({ color: 0xff0f0f, opacity: props.opacity, transparent: true })
     return (
         <group {...props} dispose={null}>
             <mesh
@@ -68,7 +66,7 @@ export const WarnModel = (props) => {
             />
         </group>
     )
-}
+}, [])
 
 useGLTF.preload(alertPath.substring(alertPath.indexOf("/models")))
 useGLTF.preload(neutralPath.substring(neutralPath.indexOf("/models")))

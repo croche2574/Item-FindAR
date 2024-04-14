@@ -11,7 +11,7 @@ export const AnchorSystem = memo((props) => {
     const [markerOpaque, setMarkerOpaque] = useState(true)
 
     //const query = 'match (n) return n'
-    const { loading: loading, result: results, first: first, run: run } = useReadCypher('MATCH (n:Item)-[r]-(c) WHERE n.class_code IN $clsnames RETURN n, r, c', { clsnames: [] })
+    const { result: results, run: run } = useReadCypher('MATCH (n:Item)-[r:CONTAINS_NUTRIENT|CONTAINS_ALLERGEN|MAY_CONTAIN_ALLERGEN|TAGGED_AS]-(c) WHERE n.class_code IN $clsnames RETURN n, r, c', { clsnames: [] })
 
     useHitTest(() => {
         setDirty(!isDirty)
@@ -54,13 +54,6 @@ export const AnchorSystem = memo((props) => {
                                 case 'CONTAINS_NUTRIENT':
                                     item.itemData.nutrients[endNode.properties.name] = relationship.properties
                                     break
-
-                                case 'CONTAINS_INGREDIENT':
-                                    break
-
-                                case 'CONTAINS_SUBINGREDIENT':
-                                    break
-
                                 case 'CONTAINS_ALLERGEN':
                                     item.itemData.allergens[endNode.properties.name] = { may: false }
                                     break

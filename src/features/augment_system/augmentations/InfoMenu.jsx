@@ -1,22 +1,10 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, memo, useCallback } from 'react'
 import { extend, useFrame, useThree } from '@react-three/fiber'
 import ThreeMeshUI from 'three-mesh-ui'
 
-//import './styles.css'
-
-const padCol = (a, b, totalLength) => {
-  let padding = ' ' // the padding character you want to use
-
-  // calculate the length of padding needed between the two numbers
-  let paddingLength = Math.max(0, totalLength - (a.length + b.length))
-
-  // add the padding between the two numbers
-  return a + padding.repeat(paddingLength) + b
-}
-
 extend(ThreeMeshUI)
 
-const Title = (props) => {
+const Title = memo((props) => {
   console.log("title", props.name)
   return (
     <block
@@ -36,10 +24,19 @@ const Title = (props) => {
       <text fontSize={0.045} content={`Brand: ${props.brand} | Servings: ${props.servings}`} />
     </block>
   )
-}
+})
 
-const NutritionBlock = (props) => {
-  console.log(props.data.nutrients['Calcium'].percentage)
+const NutritionBlock = memo((props) => {
+  const padCol = useCallback((a, b, totalLength) => {
+    let padding = ' ' // the padding character you want to use
+  
+    // calculate the length of padding needed between the two numbers
+    let paddingLength = Math.max(0, totalLength - (a.length + b.length))
+  
+    // add the padding between the two numbers
+    return a + padding.repeat(paddingLength) + b
+  }, [])
+
   return (
     <block
       args={[
@@ -111,9 +108,9 @@ const NutritionBlock = (props) => {
       />
     </block>
   )
-}
+})
 
-const ItemViewBlock = () => {
+const ItemViewBlock = memo((props) => {
   return (
     <block
       args={[
@@ -126,8 +123,9 @@ const ItemViewBlock = () => {
         }
       ]}></block>
   )
-}
-const IngredientText = (props) => {
+})
+
+const IngredientText = memo((props) => {
   return (
     <block
       args={[
@@ -142,9 +140,9 @@ const IngredientText = (props) => {
       <text content={props.data.ingredientList} />
     </block>
   )
-}
+})
 
-const IngredientBlock = (props) => {
+const IngredientBlock = memo((props) => {
   const { gl } = useThree()
 
   gl.localClippingEnabled = true
@@ -168,9 +166,9 @@ const IngredientBlock = (props) => {
 
     </block>
   )
-}
+})
 
-const TagBlock = (props) => {
+const TagBlock = memo((props) => {
   return (
     <block
       args={[
@@ -191,9 +189,9 @@ const TagBlock = (props) => {
       })}
     </block>
   )
-}
+})
 
-const AllergenBlock = (props) => {
+const AllergenBlock = memo((props) => {
   return (
     <block
       args={[
@@ -214,9 +212,9 @@ const AllergenBlock = (props) => {
       })}
     </block>
   )
-}
+})
 
-const InfoBlock = (props) => {
+const InfoBlock = memo((props) => {
   console.log(props.data)
   return (
     <block
@@ -237,15 +235,15 @@ const InfoBlock = (props) => {
       <TagBlock title="Tags" values={props.data.tags} />
     </block>
   )
-}
+})
 
-export const InfoMenu = (props) => {
+export const InfoMenu = memo((props) => {
   const itemData = props.data
 
   console.log("menu pos", props.position)
 
   useEffect(() => {
-    
+
     if (props.menuVis) {
       props.menuRef.current.update(true, true, true)
       //console.log("Menu:", props.menuRef.current)
@@ -297,4 +295,4 @@ export const InfoMenu = (props) => {
       <InfoBlock data={itemData} />
     </block>
   )
-}
+})

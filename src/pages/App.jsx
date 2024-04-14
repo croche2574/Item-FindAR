@@ -8,7 +8,6 @@ import { AppBar, Toolbar, Typography, Box, Card, CardContent, Stack, Button, Div
 import { useReadCypher } from 'use-neo4j'
 
 const LandingPage = memo((props) => {
-
   return (
     <Box style={{ zIndex: 99999 }}>
       <AppBar style={{ position: 'fixed', top: 0 }}>
@@ -29,9 +28,9 @@ const LandingPage = memo((props) => {
           <CardContent>
             <Typography variant="h5" gutterBottom>User Surveys</Typography>
             <Stack spacing={2}>
-              <Button href='https://forms.gle/6NaPm4hxKWHc4RcA6' variant="contained">Pre-Survey</Button>
+              <Button href='https://forms.gle/6NaPm4hxKWHc4RcA6' variant="contained" disabled={!navigator.onLine}>Pre-Survey</Button>
               <Divider variant="middle" />
-              <Button href='https://forms.gle/u29eRVhVwG47LjqV8' variant="contained">Post-Survey</Button>
+              <Button href='https://forms.gle/u29eRVhVwG47LjqV8' variant="contained" disabled={!navigator.onLine}>Post-Survey</Button>
             </Stack>
           </CardContent>
         </Card>
@@ -39,11 +38,25 @@ const LandingPage = memo((props) => {
       <ARButton
         enterOnly={true}
         disabled={!navigator.onLine}
-        {...(!navigator.onLine ? {innerHTML: "Offline"} : {})}
         sessionInit={{
           requiredFeatures: ['camera-access', 'hit-test', 'anchors', 'dom-overlay'],
           domOverlay: typeof document !== 'undefined' ? { root: document.body } : undefined
-        }} />
+        }}>
+        {(state) => {
+          if (navigator.onLine) {
+            switch (state) {
+              case "exited":
+                return "Enter AR"
+              case "unsupported":
+                return "AR Unsupported"
+              default:
+                return "AR " + state
+            }
+          } else {
+            return "Offline"
+          }
+        }}
+      </ARButton>
     </Box>
   )
 })
@@ -68,7 +81,7 @@ export const App = memo((props) => {
   useEffect(() => {
     console.log('class results', classResults)
     if (classResults) { setSearchClasses(classResults.map(row => row.get('class_codes'))) }
-    else {setSearchClasses([])}
+    else { setSearchClasses([]) }
   }, [classResults])
 
   useEffect(() => {
