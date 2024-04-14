@@ -20,7 +20,7 @@ export const AlertModel = memo((props) => {
             />
         </group>
     )
-}, [])
+})
 
 export const NeutralModel = memo((props) => {
     const { nodes } = useGLTF(neutralPath.substring(neutralPath.indexOf("/models")))
@@ -36,7 +36,7 @@ export const NeutralModel = memo((props) => {
             />
         </group>
     )
-}, [])
+})
 
 export const SafeModel = memo((props) => {
     const { nodes } = useGLTF(safePath.substring(safePath.indexOf("/models")))
@@ -51,7 +51,7 @@ export const SafeModel = memo((props) => {
             />
         </group>
     )
-}, [])
+})
 
 export const WarnModel = memo((props) => {
     const { nodes } = useGLTF(warnPath.substring(warnPath.indexOf("/models")))
@@ -66,7 +66,7 @@ export const WarnModel = memo((props) => {
             />
         </group>
     )
-}, [])
+})
 
 useGLTF.preload(alertPath.substring(alertPath.indexOf("/models")))
 useGLTF.preload(neutralPath.substring(neutralPath.indexOf("/models")))

@@ -96,25 +96,6 @@ export const AnchorSystem = memo((props) => {
         }
     }, [detectedItems])
 
-    useFrame((state, _, frame) => {
-        const referenceSpace = gl.xr.getReferenceSpace()
-        try {
-            let pose = frame.getViewerPose(referenceSpace)
-            let session = gl.xr.getSession()
-            let context = gl.getContext()
-            let xrviewport = session.renderState.baseLayer.getViewport(pose.views[0])
-            let proMatrix = pose.views[0].projectionMatrix
-            context.viewport(
-                xrviewport.x,
-                xrviewport.y,
-                xrviewport.width,
-                xrviewport.height,)
-            //getCameraIntrinsics(proMatrix, xrviewport)
-        } catch (error) {
-            console.log(error)
-        }
-    })
-
     //console.log("detItems", detectedItems)
     if (props.enabled && detectedItems != undefined) {
         return (

@@ -129,6 +129,7 @@ export class sendImg {
         this._width = 0
         this.resizedHeight = 0
         this.resizedWidth = 0
+        this._viewport = {}
     }
 
     set height(val) {
@@ -137,6 +138,10 @@ export class sendImg {
 
     set width(val) {
         this._width = val
+    }
+
+    set viewport(val) {
+        this._viewport = val
     }
 
     init() {
@@ -157,6 +162,7 @@ export class sendImg {
     send(img) {
         let image = new Image(this._width, this._height)
         image.bitmap.set(img)
+        image.crop(0, 0, this._viewport.width, this._viewport.height)
         image.contain(640, 640)
         client.send(image.bitmap)
     }
@@ -182,6 +188,7 @@ self.onmessage = (msg) => {
             imageSender.init()
             break
         case "send":
+            imageSender.viewport = m.data.viewport
             imageSender.send(new Uint8Array(m.data.buff))
             break
         case "classes":

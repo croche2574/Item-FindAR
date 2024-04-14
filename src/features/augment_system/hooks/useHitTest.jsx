@@ -26,7 +26,7 @@ export const useHitTest = (callback, objects, setObjects) => {
                 temp.push(obj)
             } else {
                 obsChanged = true
-                let c = transformOrigin([obj.x + (obj.w / 2), obj.y + (obj.h / 2) - .3]);
+                let c = transformOrigin([obj.x, obj.y]);
 
                 console.log("center", c)
                 session.requestReferenceSpace('viewer').then((ref) => {
