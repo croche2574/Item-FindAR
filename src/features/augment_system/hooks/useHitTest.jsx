@@ -16,36 +16,34 @@ export const useHitTest = (callback, objects, setObjects) => {
     useEffect(() => {
         if (!session || !objects) return
         //console.log(objects)
-        let temp = []
         let obsChanged = false
 
-        for (const obj of objects) {
-            //console.log("obj run", obj)
-            //console.log("obj anchor", obj.anchorData)
+        const temp = objects.map(async obj => {
+            console.log("obj", obj)
             if (obj.anchorData || obj.hitsource) {
-                temp.push(obj)
+                console.log("anchor/hitsource exists")
+                return { ...obj }
             } else {
-                obsChanged = true
                 let c = transformOrigin([obj.x, obj.y]);
 
                 console.log("center", c)
-                session.requestReferenceSpace('viewer').then((ref) => {
-                    (async () => await session.requestHitTestSource({
-                        space: ref,
-                        entityTypes: ["point"],
-                        offsetRay: new XRRay({ x: c[0], y: c[1] })
-                    }).then((hitsource) => {
-                        console.log("hit_source", hitsource)
-                        obj.hitsource = hitsource
-                    }))();
+                let refspace = await session.requestReferenceSpace('viewer')
+                let hitsource = await session.requestHitTestSource({
+                    space: refspace,
+                    entityTypes: ["point"],
+                    offsetRay: new XRRay({ x: c[0], y: c[1] })
                 })
-
-                console.log("obj", obj)
-                temp.push(obj)
+                console.log("hit_source", hitsource)
+                obsChanged = true
+                obj.hitsource = hitsource
+                return obj
             }
-        }
+        })
         if (obsChanged) {
-            setObjects(temp)
+            console.log("prommy", temp)
+            objs = Promise.all(temp)
+            console.log("temp", objs)
+            setObjects(objs)
         }
     }, [session, objects])
 
@@ -53,49 +51,50 @@ export const useHitTest = (callback, objects, setObjects) => {
         if (!frame) return
         let temp = []
         let obsChanged = false
+        let anchorData = {}
 
-        for (const obj of objects) {
-            //console.log("source", obj.hitsource)
+        temp = objects.map(obj => {
+            //console.log("source", obj)
             if (!obj.hitsource || obj.anchorData) {
-                temp.push(obj)
+                return obj
             } else {
-                obsChanged = true;
-                [obj.hit] = frame.getHitTestResults(obj.hitsource)
-                console.log('hit', obj.hit)
-                if (obj.hit) {
-                    const pose = obj.hit.getPose(refspace)
+                const [hit] = frame.getHitTestResults(obj.hitsource)
+                console.log('hit', hit)
+                if (hit) {
+                    const pose = hit.getPose(refspace)
                     //hits.push(hit)
 
                     if (pose) {
                         hitMatrix.fromArray(pose.transform.matrix)
-                        obj.hitMatrix = hitMatrix
                     }
 
-                    obj.hit.createAnchor().then(
+                    hit.createAnchor().then(
                         (anchor) => {
                             //console.log('anchor:', anchor)
                             console.log(state)
                             //console.log("matrix", obj.hitMatrix)
-                            obj.anchorData = {
+                            anchorData = {
                                 anchor: anchor,
                                 object: {
-                                    position: new Vector3().setFromMatrixPosition(obj.hitMatrix),
+                                    position: new Vector3().setFromMatrixPosition(hitMatrix),
                                     scale: new Vector3()
-                                        .setFromMatrixScale(obj.hitMatrix)
-                                        .clamp(new Vector3(0.001, 0.001, 0.001), new Vector3(0.004, 0.004, 0.004)),
+                                        .setFromMatrixScale(hitMatrix)
+                                        .clamp(new Vector3(0.002, 0.002, 0.002), new Vector3(0.004, 0.004, 0.004)),
                                     quaternion: new Quaternion().copy(state.camera.quaternion)
                                 }
                             }
                             obj.hitsource.cancel()
                             obj.hitsource = null
+                            obj.anchorData = anchorData
                             console.log("anchored", obj)
                             callback()
                         })
                 }
-                temp.push(obj)
+                obsChanged = true
+                return obj
                 //console.log(hitTestSource.current)
             }
-        }
+        })
         if (obsChanged) {
             console.log("items changed")
             setObjects(temp)

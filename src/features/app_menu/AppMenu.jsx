@@ -164,6 +164,7 @@ const SearchMenu = memo((props) => {
     ]
 
     const clearHandler = useCallback((e) => {
+        console.log("clear")
         setMenuState({})
         allergenRef.current.clearChipStates()
     }, [])

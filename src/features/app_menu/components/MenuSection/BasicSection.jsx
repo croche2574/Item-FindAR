@@ -30,10 +30,12 @@ const BasicSection = forwardRef((props, _ref) => {
 
     useImperativeHandle(_ref, () => ({
         clearChipStates: () => {
-            setMenuState({
-                ...menuState,
-                [sectionTitle]: Object.fromEntries(options.map(k => [k, 0]))
-
+            console.log("clear ", sectionTitle)
+            setMenuState((state) => {
+                return {
+                    ...state,
+                    [sectionTitle]: Object.fromEntries(options.map(k => [k, 0]))
+                }
             })
         }
     }), [menuState])

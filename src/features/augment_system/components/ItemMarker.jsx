@@ -49,15 +49,14 @@ export const ItemMarker = memo((props) => {
     useEffect(() => {
         const allergens = Object.keys(settings.allergens ?? {}).filter(setting => Object.keys(itemData.allergens).indexOf(setting) !== -1)
         const dietary = Object.keys(settings.restrictions ?? {}).filter(setting => itemData.tags.indexOf(setting) !== -1)
-        console.log("dietary:", dietary)
         console.log(settings)
         console.log(itemData)
         console.log(allergens)
-        console.log(settings.restrictions)
+        console.log(dietary)
 
-        if (allergens.length === 0 && (dietary.length === settings.restrictions?.length || typeof(settings.restrictions) === 'undefined')) {
+        if (allergens.length === 0 && (dietary.length === Object.keys(settings.restrictions ?? {}).length || typeof(settings.restrictions) === 'undefined' || Object.keys(settings.restrictions ?? {}).length === 0)) {
             (searchMode) ? setAlertLevel('safe') : setAlertLevel('neutral')
-        } else if (allergens.filter((allergen) => { return itemData.allergens[allergen].may === false && settings.allergens[allergen] != 2 }).length !== 0 && dietary.length === settings.restrictions.length) {
+        } else if (allergens.filter((allergen) => { return itemData.allergens[allergen].may === false && settings.allergens[allergen] != 2 }).length !== 0 && (dietary.length === Object.keys(settings.restrictions ?? {}).length || typeof(settings.restrictions) === 'undefined' || Object.keys(settings.restrictions ?? {}).length === 0)) {
             setAlertLevel('alert')
         } else {
             setAlertLevel('warn')

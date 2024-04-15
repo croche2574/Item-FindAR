@@ -101,9 +101,9 @@ export const AnchorSystem = memo((props) => {
         return (
             <group>
                 {detectedItems.map((item, index) => {
-                    //console.log("render", item)
+                    console.log("render", item)
                     //console.log("anchorData", item.anchorData)
-                    if (!item.anchorData) {
+                    if (typeof(item.anchorData) === 'undefined') {
                         console.log("No anchor")
                         return
                     } else if (!item.itemData) {
