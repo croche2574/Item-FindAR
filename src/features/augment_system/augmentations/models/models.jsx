@@ -2,10 +2,10 @@ import React, { memo } from 'react'
 import { useGLTF } from '@react-three/drei'
 import { MeshBasicMaterial } from 'three'
 
-import alertPath from './alert.glb'
-import neutralPath from './neutral.glb'
-import safePath from './safe.glb'
-import warnPath from './warn.glb'
+import alertPath from './alert.glb?url'
+import neutralPath from './neutral.glb?url'
+import safePath from './safe.glb?url'
+import warnPath from './warn.glb?url'
 
 export const AlertModel = memo((props) => {
     const { nodes } = useGLTF(alertPath.substring(alertPath.indexOf("/models")))

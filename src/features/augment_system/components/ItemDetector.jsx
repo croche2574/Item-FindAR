@@ -1,6 +1,6 @@
 import { useInterval } from "../hooks/useInterval"
 import React, { useState, useEffect, useCallback, useRef, useMemo, memo } from "react";
-import { useFrame, RootState, useThree } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 
 const Detector = memo((props) => {
     const socket = useMemo(() => new Worker(new URL("../workers/sendImg", import.meta.url)), [])
@@ -46,11 +46,7 @@ const Detector = memo((props) => {
             intrinsicsPrinted.current[intrinsicString] = true;
         }
     }
-    /**
-     * @param {RootState} state
-     * @param {number} delta
-     * @param {XRFrame} xrFrame
-     */
+
     useFrame((state, delta, xrFrame) => { // Get the image from the frame
         if (state.gl.xr.isPresenting) { // Check if session active
             const _surface = state.gl.getRenderTarget()
