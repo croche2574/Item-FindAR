@@ -6,6 +6,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 export default defineConfig({
     assetsInclude: ['**/*.glb'],
     base: './',
+    envDir: './env',
     commonjsOptions: {
         esmExternals: true,
      },

@@ -37,6 +37,7 @@
     "@react-three/drei": "^9.88.3",
     "@react-three/fiber": "^8.14.0",
     "@react-three/xr": "^5.7.1",
+    "dotenv": "^16.4.5",
     "imagescript": "github:matmen/ImageScript#browser",
     "js-cookie": "^3.0.5",
     "material-ui-popup-state": "^5.0.9",
