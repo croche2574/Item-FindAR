@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback, useRef, useMemo, memo } from "
 import { useFrame, useThree } from "@react-three/fiber";
 
 const Detector = memo((props) => {
-    const socket = useMemo(() => new Worker(new URL("../workers/sendImg", import.meta.url)), [])
+    const socket = useMemo(() => new Worker(new URL("../workers/sendImg", import.meta.url), {type: 'module'}), [])
     const [socketStatus, setSocketStatus] = useState("Closed")
     const timeout = 1000
     const height = Math.round((window.screen.height * window.devicePixelRatio) / 10) * 10
@@ -36,10 +36,10 @@ const Detector = memo((props) => {
         // Print the calculated intrinsics, but once per unique value to
         // avoid log spam. These can change every frame for some XR devices.
         const intrinsicString = (
-            "intrinsics: u0=" +u0 + " v0=" + v0 + " ax=" + ax + " ay=" + ay +
-                " gamma=" + gamma + " for viewport {width=" +
-                viewport.width + ",height=" + viewport.height + ",x=" +
-                viewport.x + ",y=" + viewport.y + "}");
+            "intrinsics: u0=" + u0 + " v0=" + v0 + " ax=" + ax + " ay=" + ay +
+            " gamma=" + gamma + " for viewport {width=" +
+            viewport.width + ",height=" + viewport.height + ",x=" +
+            viewport.x + ",y=" + viewport.y + "}");
         if (!intrinsicsPrinted.current[intrinsicString]) {
             console.log("projection:", Array.from(projectionMatrix).join(", "));
             console.log(intrinsicString);
@@ -67,13 +67,14 @@ const Detector = memo((props) => {
                 let viewport = session.renderState.baseLayer.getViewport(view)
                 context.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
                 getCameraIntrinsics(view.projectionMatrix, viewport);
-                
+
                 if (viewerPose.views[0].camera) {
                     setCameraViewport({
                         width: view.camera.width,
                         height: view.camera.height,
                         x: 0,
-                        y: 0})
+                        y: 0
+                    })
                     getCameraIntrinsics(view.projectionMatrix, cameraViewport);
                 }
                 //console.log("get frame")
@@ -81,32 +82,39 @@ const Detector = memo((props) => {
                 let glTex = glBinding.getCameraImage(view.camera)
                 //const texture_bytes = view.camera.width * view.camera.height * 4
                 const texture_bytes = width * height * 4
-                if (!frameImg.current || frameImg.current.length != texture_bytes) {
+                if (!frameImg.current || ((frameImg.current.length != texture_bytes) && (frameImg.current.length != 0))) {
+                    console.log("new array")
                     frameImg.current = new Uint8Array(texture_bytes)
                 }
-                frameImg.current.fill(0)
-                //console.log(framebuffer.current)
-                context.bindTexture(context.TEXTURE_2D, glTex)
-                context.bindFramebuffer(context.FRAMEBUFFER, framebuffer.current)
-                context.framebufferTexture2D(context.FRAMEBUFFER, context.COLOR_ATTACHMENT0, context.TEXTURE_2D, glTex, 0);
-                
-                if (context.checkFramebufferStatus(context.FRAMEBUFFER) == context.FRAMEBUFFER_COMPLETE) {
-                    //context.readPixels(0, 0, view.camera.width, view.camera.height, context.RGBA, context.UNSIGNED_BYTE, pixels.current)
-                    context.readPixels(0, 0, width, height, context.RGBA, context.UNSIGNED_BYTE, frameImg.current)
-                    const e = context.getError()
-                    if (e != 0) {
-                        console.warn("GL Error: ", e)
+
+                if (frameImg.current.length != 0) {
+                    frameImg.current.fill(0)
+                    //console.log(framebuffer.current)
+                    context.bindTexture(context.TEXTURE_2D, glTex)
+                    context.bindFramebuffer(context.FRAMEBUFFER, framebuffer.current)
+                    context.framebufferTexture2D(context.FRAMEBUFFER, context.COLOR_ATTACHMENT0, context.TEXTURE_2D, glTex, 0);
+
+                    if (context.checkFramebufferStatus(context.FRAMEBUFFER) == context.FRAMEBUFFER_COMPLETE) {
+                        //context.readPixels(0, 0, view.camera.width, view.camera.height, context.RGBA, context.UNSIGNED_BYTE, pixels.current)
+                        context.readPixels(0, 0, width, height, context.RGBA, context.UNSIGNED_BYTE, frameImg.current)
+                        const e = context.getError()
+                        if (e != 0) {
+                            console.warn("GL Error: ", e)
+                        }
+                    } else {
+                        console.warn("Framebuffer incomplete!");
                     }
+                    context.bindFramebuffer(context.FRAMEBUFFER, session.renderState.baseLayer.framebuffer)
+                    state.gl.setRenderTarget(_surface)
+                    //console.log("buffer bound")
                 } else {
-                    console.warn("Framebuffer incomplete!");
+                    //console.log("Buffer held by worker")
                 }
-                context.bindFramebuffer(context.FRAMEBUFFER, session.renderState.baseLayer.framebuffer)
-                state.gl.setRenderTarget(_surface)
-                //console.log(frameImg.current)
             }
         }
     })
 
+    
     useEffect(() => {
         console.log('send classes: ', props.classes)
         if (props.classes) { socket.postMessage({ mode: "classes", classes: props.classes }) }
@@ -119,30 +127,34 @@ const Detector = memo((props) => {
             try {
                 socket.postMessage({ mode: "send", buff: frameImg.current.buffer, viewport: cameraViewport }, [frameImg.current.buffer])
             } catch (error) {
-                console.log("Frame detached.")
+                console.log("Frame buffer detached.")
             }
         }
     }, timeout)
 
     useEffect(() => { // Receive coords from server
         socket.onmessage = (e) => {
-            console.log(e.data)
-            switch (e.data) {
-                case "Open":
-                    setSocketStatus(e.data)
+            //console.log(e.data)
+            switch (e.data.mode) {
+                case "status":
+                    setSocketStatus(e.data.status)
                     break
-                case "Closed":
-                    console.log(e.data)
-                    setSocketStatus(e.data)
+                case "coords":
+                    if (e.data == "\"[]\"") {
+                        console.log("set empty")
+                        props.setDetectedItems([])
+                    } else {
+                        console.log(e.data)
+                        props.setDetectedItems((state) => {
+                            return props.dataProcessor(JSON.parse(e.data.payload), state)
+                        })
+                    }
                     break
-                case "\"[]\"":
-                    console.log("set empty")
-                    props.setDetectedItems([])
+                case "buffer":
+                    frameImg.current = new Uint8Array(e.data.payload)
+                    //console.log("buffer reattached")
                     break
                 default:
-                    props.setDetectedItems((state) => {
-                        return props.dataProcessor(JSON.parse(e.data), state)
-                    })
                     break
             }
         }
@@ -153,13 +165,13 @@ export const ItemDetector = memo((props) => {
     const detectProc = useCallback((data, state) => {
         let newData = JSON.parse(data)
         let temp = []
-        console.log("fetched data", newData)
-        console.log("item props", props.detectedItems)
+        //console.log("fetched data", newData)
+        //console.log("item props", props.detectedItems)
         if (state.length === 0) {
             temp = newData
         } else {
             for (var newObj of newData) {
-                console.log("new ob", newObj)
+                //console.log("new ob", newObj)
                 let tempObj = null
                 for (const obj of state) {
                     if (newObj.id === obj.id) {

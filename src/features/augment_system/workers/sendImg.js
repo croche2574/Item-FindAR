@@ -25,7 +25,7 @@ class WebSocketClient {
             if (that.#reconnected && that.debug) {
                 console.log('[WS]: Reconnected.')
             }
-            self.postMessage("Open")
+            self.postMessage({mode: 'status', status: "Open"})
             that.onopen(ev)
         }
 
@@ -34,15 +34,16 @@ class WebSocketClient {
         }
 
         this.instance.onclose = (e) => {
+            console.log(e)
             switch (e) {
                 case 1000:
                     if (that.debug) {
                         console.log('[WS]: Closed.')
-                        self.postMessage("Closed")
+                        self.postMessage({mode: 'status', status: "Closed"})
                     }
                     break
                 default:
-                    self.postMessage("Closed")
+                    self.postMessage({mode: 'status', status: "Closed"})
                     that.reconnect(e)
                     break
             }
@@ -114,11 +115,11 @@ class WebSocketClient {
     }
 }
 
-var client = new WebSocketClient("wss://ai.itemfindar.net/detect")
+var client = new WebSocketClient(import.meta.env.VITE_BACKEND_ADDRESS)
 
 client.onmessage = (e) => {
     console.log(e)
-    self.postMessage(e.data)
+    self.postMessage({mode: 'coords', payload: e.data})
 }
 
 client.open()
@@ -190,6 +191,7 @@ self.onmessage = (msg) => {
         case "send":
             imageSender.viewport = m.data.viewport
             imageSender.send(new Uint8Array(m.data.buff))
+            self.postMessage({mode: 'buffer', payload: m.data.buff}, [m.data.buff])
             break
         case "classes":
             imageSender.sendClasses(m.data.classes)

@@ -2,6 +2,7 @@ const path = require('path')
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import mkcert from 'vite-plugin-mkcert'
 
 export default defineConfig({
     assetsInclude: ['**/*.glb'],
@@ -14,6 +15,7 @@ export default defineConfig({
         include: ['@react-three/fiber']
     },
     plugins: [
+        mkcert(),
         react(),
         VitePWA({
             registerType: 'autoUpdate',
